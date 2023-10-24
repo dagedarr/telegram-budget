@@ -8,7 +8,7 @@ from aiogram.enums import ParseMode
 from config import Config
 from core.db import AsyncSessionLocal
 from core.db_middleware import DbSessionMiddleware
-from handlers import command_router, registration_router
+from handlers import command_router, main_router, registration_router
 
 dp = Dispatcher()
 
@@ -19,8 +19,9 @@ async def main() -> None:
         DbSessionMiddleware(session_pool=AsyncSessionLocal)
     )
     dp.include_routers(
+        main_router,
         command_router,
-        registration_router
+        registration_router,
     )
     await dp.start_polling(bot)
 
