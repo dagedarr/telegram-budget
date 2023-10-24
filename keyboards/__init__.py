@@ -1,1 +1,2 @@
-from .user_keyboards import universal_keyboard, main_keyboard  # noqa
+from .user_keyboards import (main_keyboard, other_keyboard,  # noqa
+                             set_info_keyboard, universal_keyboard)
