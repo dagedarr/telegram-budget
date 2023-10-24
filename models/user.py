@@ -5,11 +5,8 @@ from core.db import Base
 
 class User(Base):
     """Модель пользователей"""
-
     username = Column(String(64), nullable=True)
-    description = Column(Text)
     email = Column(String(254), unique=True, index=True, nullable=True)
     # Время в формате Unix.
     registration_time = Column(BigInteger)
-    is_superuser = Column(Boolean, default=False)
     is_onboarding = Column(Boolean, default=False)
