@@ -27,7 +27,6 @@ def universal_keyboard(
     return builder.as_markup()
 
 
-
 def main_keyboard():
     """
     Основная клавиатура пользователя.
@@ -35,47 +34,77 @@ def main_keyboard():
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
-            text="Удалить последнюю трату", callback_data="events_menu"
+            text='Удалить последнюю трату',
+            callback_data='del_last_transaction'
         ),
-        InlineKeyboardButton(text="Последние траты", callback_data="discounts"),
+        InlineKeyboardButton(
+            text='Последние траты',
+            callback_data='latest_transactions'
+        ),
     ),
     builder.row(
         InlineKeyboardButton(
-            text="Категории", callback_data="knowledge_base"
+            text='Остальное',
+            callback_data='other'
+        )
+    )
+
+    return builder.as_markup()
+
+
+def other_keyboard():
+    """
+    Клавиатура "Остальное".
+    """
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text='Категории', callback_data='knowledge_base'
         ),
         InlineKeyboardButton(
-            text="Статистика", callback_data="about_self"
+            text='Статистика', callback_data='about_self'
         ),
     )
     builder.row(
         InlineKeyboardButton(
-            text="Остальное", callback_data="onboarding_msg_7"
+            text='Изменить данные о себе', callback_data='change_info'
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text='Связаться с разработчиком', url='https://t.me/nilotan',
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text='Назад', callback_data='main'
         )
     )
     return builder.as_markup()
 
-def main_keyboard():
+
+def set_info_keyboard(is_onboarding=False):
     """
-    Основная клавиатура пользователя.
+    Клавиатура изменения данных пользователя.
     """
     builder = InlineKeyboardBuilder()
-    builder.row(
-        InlineKeyboardButton(
-            text="Удалить последнюю трату", callback_data="events_menu"
-        ),
-        InlineKeyboardButton(text="Последние траты", callback_data="discounts"),
-    ),
-    builder.row(
-        InlineKeyboardButton(
-            text="Категории", callback_data="knowledge_base"
-        ),
-        InlineKeyboardButton(
-            text="Статистика", callback_data="about_self"
-        ),
+    builder.add(InlineKeyboardButton(
+        text='Ввести почту' if is_onboarding else 'Поменять почту',
+        callback_data='get_mail')
     )
-    builder.row(
-        InlineKeyboardButton(
-            text="Остальное", callback_data="onboarding_msg_7"
+    builder.add(InlineKeyboardButton(
+        text='Поменять имя',
+        callback_data='get_username')
+    )
+    if is_onboarding:
+        builder.add(InlineKeyboardButton(
+            text='Завершить регистрацию',
+            callback_data='registration_end')
         )
-    )
+    else:
+        builder.add(InlineKeyboardButton(
+            text='Назад',
+            callback_data='other')
+        )
+    builder.adjust(2)
     return builder.as_markup()
