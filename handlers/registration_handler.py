@@ -5,11 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.crud import get_by_id, get_or_create, update
 from forms.user_form import RegistrationForm
-from keyboards import universal_keyboard, main_keyboard
+from keyboards import set_info_keyboard, universal_keyboard
 from models import User
 from utils.user_actions import callback_message, make_onboarding_end
 
-router = Router(name="registration_router")
+router = Router(name='registration_router')
 
 # ------------------------ REGISTRATION ------------------------
 
@@ -23,29 +23,21 @@ async def registration(callback: CallbackQuery, session: AsyncSession):
         id=callback.from_user.id,
     )
     default_username = callback.from_user.username
-    keyboard = universal_keyboard(
-        [
-            ('Ввести почту', 'get_mail'),
-            ('Поменять имя', 'get_username'),
-            ('Завершить регистрацию', 'registration_end')
-        ],
-        buttons_per_row=2
-    )
 
     await callback_message(
         target=callback,
         text='Введите данные о себе чтобы мы всегда были на связи.\n'
         f'Также вы можете изменить имя "{default_username}" на другое',
-        reply_markup=keyboard,
+        reply_markup=set_info_keyboard(is_onboarding=True),
     )
 
 # ------------------------ MAIL ------------------------
 
 
-@router.callback_query(F.data == "get_mail")
+@router.callback_query(F.data == 'get_mail')
 async def get_mail(callback: CallbackQuery, state: FSMContext):
     """Устанавливает state для получения почты."""
-
+    await state.clear()
     await state.set_state(RegistrationForm.mail)
     await callback_message(
         target=callback,
@@ -66,7 +58,7 @@ async def get_mail_from_message(message: Message, state: FSMContext):
         buttons_per_row=2,
     )
     await message.answer(
-        text=f"Установить почту: {message.text}?",
+        text=f'Установить почту: {message.text}?',
         reply_markup=keyboard,
     )
 
@@ -97,15 +89,15 @@ async def set_mail(
         text=f'Почта установлена как "{mail}"',
         reply_markup=keyboard,
     )
-
+    await state.clear()
 
 # ------------------------ USERNAME ------------------------
 
 
-@router.callback_query(F.data == "get_username")
+@router.callback_query(F.data == 'get_username')
 async def get_username(callback: CallbackQuery, state: FSMContext):
     """Устанавливает state для получения имени."""
-
+    await state.clear()
     await state.set_state(RegistrationForm.username)
     await callback_message(
         target=callback,
@@ -116,7 +108,6 @@ async def get_username(callback: CallbackQuery, state: FSMContext):
 @router.message(RegistrationForm.username)
 async def get_name_from_message(message: Message, state: FSMContext):
     """Получает имя из сообщения."""
-
     await state.update_data(username=message.text)
     keyboard = universal_keyboard(
         [
@@ -126,12 +117,12 @@ async def get_name_from_message(message: Message, state: FSMContext):
         buttons_per_row=2,
     )
     await message.answer(
-        text=f"Установить имя: {message.text}?",
+        text=f'Установить имя: {message.text}?',
         reply_markup=keyboard,
     )
 
 
-@router.callback_query(F.data == "set_username", RegistrationForm.username)
+@router.callback_query(F.data == 'set_username', RegistrationForm.username)
 async def set_username(
     callback: CallbackQuery, session: AsyncSession, state: FSMContext
 ):
@@ -157,12 +148,16 @@ async def set_username(
         text=f'Имя установлено как "{username}"',
         reply_markup=keyboard,
     )
+    await state.clear()
 
 # ------------------------ REGISTRATION END ------------------------
 
 
 @router.callback_query(F.data == 'registration_end')
 async def registration_end(callback: CallbackQuery, session: AsyncSession):
+    keyboard = universal_keyboard([
+        ('Меню', 'main')
+    ])
     user_id = callback.from_user.id
     user = await get_by_id(
         model=User,
@@ -178,10 +173,6 @@ async def registration_end(callback: CallbackQuery, session: AsyncSession):
     await callback_message(
         target=callback,
         text=f'Регистрация завершена! {user.username}, '
-             'спасибо за регистрацию!'
-    )
-    await callback.answer(
-        text='Основное меню, команды можно посмотреть нажав на /help '
-        'или открыв панель слева от чата',
-        reply_markup=main_keyboard()
+             'спасибо за регистрацию!',
+        reply_markup=keyboard
     )
