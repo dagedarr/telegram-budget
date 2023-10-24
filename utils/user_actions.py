@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Union
 
 from aiogram.types import CallbackQuery, Message
@@ -13,13 +14,15 @@ async def make_onboarding_end(
     session: AsyncSession,
     default_username: str
 ):
-    user = await get_by_id(
+    user: User = await get_by_id(
         model=User,
         obj_id=user_id,
         session=session
     )
     if not user.username:
         user.username = default_username
+    if not user.registration_time:
+        user.registration_time = datetime.now().timestamp()
     user.is_onboarding = True
     await session.commit()
 
