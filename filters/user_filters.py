@@ -10,6 +10,7 @@ class IsEndOnboardingFilter(BaseFilter):
     """
     Фильтр для проверки прохождения онбординга.
     """
+
     async def __call__(self, message: Message) -> bool:
         session = await get_async_session()
 
@@ -19,4 +20,8 @@ class IsEndOnboardingFilter(BaseFilter):
             session=session,
         )
         if user:
+            await session.close()
             return user.is_onboarding
+        else:
+            await session.close()
+            return False
