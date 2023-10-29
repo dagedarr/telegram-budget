@@ -1,15 +1,11 @@
 from aiogram import F, Router
-from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.crud import get_by_id, update
-from filters import IsEndOnboardingFilter
-from forms.user_form import RegistrationForm
-from keyboards import (main_keyboard, other_keyboard, set_info_keyboard,
-                       universal_keyboard)
-from models import User
+from keyboards import main_keyboard, other_keyboard
 from utils.user_actions import callback_message
+from sqlalchemy.ext.asyncio import AsyncSession
+from utils.transactions import parse_text_for_amount_and_category
+
 
 router = Router(name="main_router")
 
@@ -34,3 +30,22 @@ async def other(callback: CallbackQuery):
         replace_message=True
     )
 
+
+@router.message(F.text)
+async def get_transactions(message: Message, session: AsyncSession):
+
+    amount, cat_title = await parse_text_for_amount_and_category(
+        text=message.text
+    )
+
+    print(f'Сумма: "{amount}"\nКатегория: "{cat_title}"')
+
+    # transaction = float(message.text)
+    # await create(
+    #     session=session,
+    #     model=Transaction,
+    #     user_id=message.from_user.id,
+    #     date=datetime.now().timestamp(),
+    #     category_id=1,
+    #     amount=transaction
+    # )
