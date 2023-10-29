@@ -84,12 +84,12 @@ async def set_mail(
         obj_in={'email': mail},
         session=session
     )
+    await state.clear()
     await callback_message(
         target=callback,
         text=f'Почта установлена как "{mail}"',
         reply_markup=keyboard,
     )
-    await state.clear()
 
 # ------------------------ USERNAME ------------------------
 
@@ -143,12 +143,12 @@ async def set_username(
         obj_in={'username': username},
         session=session
     )
+    await state.clear()
     await callback_message(
         target=callback,
         text=f'Имя установлено как "{username}"',
         reply_markup=keyboard,
     )
-    await state.clear()
 
 # ------------------------ REGISTRATION END ------------------------
 
@@ -169,7 +169,6 @@ async def registration_end(callback: CallbackQuery, session: AsyncSession):
         session=session,
         default_username=callback.from_user.username
     )
-
     await callback_message(
         target=callback,
         text=f'Регистрация завершена! {user.username}, '

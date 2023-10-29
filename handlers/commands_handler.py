@@ -43,6 +43,7 @@ async def cmd_start(message: Message):
 
 @router.message(Command(commands=["help"]))
 async def cmd_help(message: Message):
+    raise NotImplementedError
     await message.answer(
         'FIXME'
     )

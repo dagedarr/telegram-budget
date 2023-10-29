@@ -22,6 +22,5 @@ class IsEndOnboardingFilter(BaseFilter):
         if user:
             await session.close()
             return user.is_onboarding
-        else:
-            await session.close()
-            return False
+        await session.close()
+        return False

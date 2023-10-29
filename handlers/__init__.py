@@ -10,7 +10,7 @@ handlers_router = Router()
 
 handlers_router.include_routers(
     change_info_router,
-    main_router,
     command_router,
     registration_router,
+    main_router,
 )
