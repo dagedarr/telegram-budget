@@ -46,3 +46,13 @@ async def update(
     await session.commit()
     await session.refresh(db_obj)
     return db_obj
+
+
+async def create(
+    session: AsyncSession,
+    model: ModelType,
+    **kwargs
+):
+    """Создание объекта."""
+    await session.execute(insert(model).values(**kwargs))
+    await session.commit()
