@@ -69,7 +69,7 @@ async def get_transactions(message: Message, session: AsyncSession):
         alias_id=category_or_alias_id[1],
         amount=amount
     )
-    
+
     await callback_message(
         target=message,
         text=str(new_transaction),
