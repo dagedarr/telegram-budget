@@ -12,7 +12,13 @@ class Category(Base):
     aliases = relationship(
         'Alias', back_populates='category', cascade='all, delete-orphan'
     )
-    # transactions = relationship('Transaction', back_populates='category')
+    transactions = relationship('Transaction', back_populates='category')
+
+    def __str__(self) -> str:
+        return self.title
+
+    def __repr__(self) -> str:
+        return self.title
 
 
 class Alias(Base):
@@ -21,4 +27,13 @@ class Alias(Base):
     title = Column(String(64), nullable=False)
 
     user = relationship('User', back_populates='aliases')
-    category = relationship('Category', back_populates='aliases')
+    category = relationship(
+        'Category', back_populates='aliases', lazy='selectin')
+    transactions = relationship(
+        'Transaction', back_populates='alias', lazy='selectin')
+
+    def __str__(self) -> str:
+        return self.title
+
+    def __repr__(self) -> str:
+        return self.title
