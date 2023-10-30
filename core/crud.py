@@ -53,6 +53,25 @@ async def create(
     model: ModelType,
     **kwargs
 ):
-    """Создание объекта."""
-    await session.execute(insert(model).values(**kwargs))
+    """Создание объекта и возвращает его."""
+    new_object = model(**kwargs)
+    session.add(new_object)
     await session.commit()
+    await session.refresh(new_object)
+    return new_object
+
+
+async def get_by_attributes(
+    model: ModelType,
+    attributes: dict,
+    session: AsyncSession
+):
+    """Получение объекта по нескольким атрибутам."""
+    query = select(model).where(
+        *[
+            getattr(model, attr_name) == attr_value
+            for attr_name, attr_value in attributes.items()
+        ]
+    )
+    get_obj_in_db = await session.execute(query)
+    return get_obj_in_db.scalars().first()
