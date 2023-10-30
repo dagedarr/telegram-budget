@@ -1,11 +1,12 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from keyboards import main_keyboard, other_keyboard
+from utils.transactions import (amount_validate, create_transaction,
+                                get_category_or_alias_id,
+                                parse_text_for_amount_and_category)
 from utils.user_actions import callback_message
-from sqlalchemy.ext.asyncio import AsyncSession
-from utils.transactions import parse_text_for_amount_and_category
-
 
 router = Router(name="main_router")
 
@@ -33,19 +34,44 @@ async def other(callback: CallbackQuery):
 
 @router.message(F.text)
 async def get_transactions(message: Message, session: AsyncSession):
-
-    amount, cat_title = await parse_text_for_amount_and_category(
+    amount, title = await parse_text_for_amount_and_category(
         text=message.text
     )
+    print(f'{amount=}; {title=}')
+    if not await amount_validate(amount=amount, message=message):
+        return
 
-    print(f'Сумма: "{amount}"\nКатегория: "{cat_title}"')
+    if not title:
+        # FIXME
+        # надо предложить создать категорию или добавить трату в "Категория по умолчанию"
+        await callback_message(
+            target=message,
+            text='Я не смог обнаружить категорию в вашем сообщении',
+            delete_reply=False
+        )
+        return
 
-    # transaction = float(message.text)
-    # await create(
-    #     session=session,
-    #     model=Transaction,
-    #     user_id=message.from_user.id,
-    #     date=datetime.now().timestamp(),
-    #     category_id=1,
-    #     amount=transaction
-    # )
+    category_or_alias_id = await get_category_or_alias_id(
+        title=title,
+        message=message,
+        session=session
+    )
+    print(category_or_alias_id)
+    if category_or_alias_id is None:
+        # await create_category_or_alias()
+        print('Пустая категория')
+        return
+
+    new_transaction = await create_transaction(
+        session=session,
+        user_id=message.from_user.id,
+        category_id=category_or_alias_id[0],
+        alias_id=category_or_alias_id[1],
+        amount=amount
+    )
+    
+    await callback_message(
+        target=message,
+        text=str(new_transaction),
+        delete_reply=False
+    )
