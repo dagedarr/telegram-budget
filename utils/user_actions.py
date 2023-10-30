@@ -32,6 +32,7 @@ async def callback_message(
     text: str,
     reply_markup: InlineKeyboardMarkup = None,
     replace_message: bool = False,
+    delete_reply: bool = True,
     **kwargs,
 ):
     """Редактировние сообщения."""
@@ -49,4 +50,4 @@ async def callback_message(
             reply_markup=reply_markup,
             **kwargs
         )
-        await target.delete_reply_markup()
+        await target.delete_reply_markup() if delete_reply else None
