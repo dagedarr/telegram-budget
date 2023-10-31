@@ -1,4 +1,4 @@
-from typing import TypeVar
+from typing import TypeVar, Optional
 
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,8 +11,9 @@ async def get_by_id(
     model: ModelType,
     obj_id: int,
     session: AsyncSession
-):
+) -> ModelType:
     """Получение объекта по id."""
+
     get_obj_in_db = await session.execute(
         select(model).where(model.id == obj_id)
     )
@@ -25,6 +26,7 @@ async def get_or_create(
     **kwargs
 ):
     """Получение или создание объекта."""
+
     instance = await session.execute(select(model).filter_by(**kwargs))
     instance = instance.scalars().one_or_none()
 
@@ -40,6 +42,7 @@ async def update(
     session: AsyncSession,
 ) -> ModelType:
     """Изменение значений полей объекта."""
+
     for field in obj_in:
         setattr(db_obj, field, obj_in[field])
     session.add(db_obj)
@@ -54,6 +57,7 @@ async def create(
     **kwargs
 ):
     """Создание объекта и возвращает его."""
+
     new_object = model(**kwargs)
     session.add(new_object)
     await session.commit()
@@ -64,14 +68,40 @@ async def create(
 async def get_by_attributes(
     model: ModelType,
     attributes: dict,
-    session: AsyncSession
+    session: AsyncSession,
+    get_multi: bool = False,
+    amount: Optional[int] = None,
+    order_by: Optional[str] = None
 ):
-    """Получение объекта по нескольким атрибутам."""
+    """Получение объекта/объектов по нескольким атрибутам."""
+
     query = select(model).where(
         *[
             getattr(model, attr_name) == attr_value
             for attr_name, attr_value in attributes.items()
         ]
     )
-    get_obj_in_db = await session.execute(query)
-    return get_obj_in_db.scalars().first()
+
+    if order_by is not None:
+        query = query.order_by(getattr(model, order_by).desc())
+
+    if not get_multi:
+        get_obj_in_db = await session.execute(query)
+        return get_obj_in_db.scalars().first()
+
+    if amount is not None:
+        query = query.limit(amount)
+
+    get_objs_in_db = await session.execute(query)
+    return get_objs_in_db.scalars().all()
+
+
+async def remove(
+    db_obj: ModelType,
+    session: AsyncSession,
+) -> ModelType:
+    """Удаление объекта."""
+
+    await session.delete(db_obj)
+    await session.commit()
+    return db_obj
