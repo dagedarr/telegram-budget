@@ -5,13 +5,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from keyboards import main_keyboard, other_keyboard
 from utils.transactions import (amount_validate, create_transaction,
                                 get_category_or_alias_id,
-                                parse_text_for_amount_and_category)
+                                parse_text_for_amount_and_category, get_transactions_message)
 from utils.user_actions import callback_message
+from core.crud import get_by_attributes, remove
+from models import Transaction
+from keyboards import back_to_menu_keyboard
+from config import Config
 
-router = Router(name="main_router")
+router = Router(name='main_router')
 
 
-@router.callback_query(F.data == "main")
+@router.callback_query(F.data == 'main')
 async def main(callback: CallbackQuery):
     """Обрабатывает основные функции бота."""
     await callback_message(
@@ -21,9 +25,56 @@ async def main(callback: CallbackQuery):
     )
 
 
-@router.callback_query(F.data == "other")
+@router.callback_query(F.data == 'latest_transactions')
+async def latest_transactions(callback: CallbackQuery, session: AsyncSession):
+    """Выводит посление N транзакций пользователя."""
+
+    transactions = await get_by_attributes(
+        model=Transaction,
+        attributes={
+            'user_id': callback.from_user.id
+        },
+        session=session,
+        get_multi=True,
+        amount=Config.LATEST_TRANSACTIONS_NUM,
+        order_by='date'
+    )
+    text = await get_transactions_message(transactions=transactions)
+    await callback_message(
+        target=callback,
+        text=text,
+        reply_markup=back_to_menu_keyboard()
+    )
+
+
+@router.callback_query(F.data == 'del_last_transaction')
+async def del_last_transaction(callback: CallbackQuery, session: AsyncSession):
+    """Удаляет последнюю транзакцию пользователя."""
+
+    last_transaction = await get_by_attributes(
+        model=Transaction,
+        attributes={
+            'user_id': callback.from_user.id
+        },
+        order_by='date',
+        session=session,
+    )
+
+    await remove(
+        db_obj=last_transaction,
+        session=session
+    )
+
+    await callback_message(
+        target=callback,
+        text=f'Трата "{last_transaction}" успешно удалена!',
+        reply_markup=back_to_menu_keyboard()
+    )
+
+
+@router.callback_query(F.data == 'other')
 async def other(callback: CallbackQuery):
-    """Выводит Категории и Статистику и осльной функционал."""
+    """Выводит Категории и Статистику и остальной функционал."""
     await callback_message(
         target=callback,
         text='Просмотр Категории и Статистики',
@@ -37,7 +88,6 @@ async def get_transactions(message: Message, session: AsyncSession):
     amount, title = await parse_text_for_amount_and_category(
         text=message.text
     )
-    print(f'{amount=}; {title=}')
     if not await amount_validate(amount=amount, message=message):
         return
 
@@ -46,7 +96,7 @@ async def get_transactions(message: Message, session: AsyncSession):
         # надо предложить создать категорию или добавить трату в "Категория по умолчанию"
         await callback_message(
             target=message,
-            text='Я не смог обнаружить категорию в вашем сообщении',
+            text='Я не смог обнаружить категорию в вашем сообщении :(',
             delete_reply=False
         )
         return
@@ -56,10 +106,11 @@ async def get_transactions(message: Message, session: AsyncSession):
         message=message,
         session=session
     )
-    print(category_or_alias_id)
+
     if category_or_alias_id is None:
-        # await create_category_or_alias()
-        print('Пустая категория')
+        # FIXME
+        # Категория не найдена, надо предложить создать категорию или алиас с таким названием
+        print('Категория или Алиас с таким названием не найдены :(')
         return
 
     new_transaction = await create_transaction(
@@ -69,9 +120,8 @@ async def get_transactions(message: Message, session: AsyncSession):
         alias_id=category_or_alias_id[1],
         amount=amount
     )
-
     await callback_message(
         target=message,
-        text=str(new_transaction),
+        text=f'Трата "{new_transaction}" успешно записана!',
         delete_reply=False
     )
