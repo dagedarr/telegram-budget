@@ -59,10 +59,10 @@ def other_keyboard():
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
-            text='Категории', callback_data='knowledge_base'
+            text='Категории', callback_data='category_menu'
         ),
         InlineKeyboardButton(
-            text='Статистика', callback_data='about_self'
+            text='Статистика', callback_data='statistic_menu'
         ),
     )
     builder.row(
@@ -107,4 +107,13 @@ def set_info_keyboard(is_onboarding=False):
             callback_data='other')
         )
     builder.adjust(2)
+    return builder.as_markup()
+
+
+def back_to_menu_keyboard():
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(
+        text='Вернуться в меню',
+        callback_data='main')
+    )
     return builder.as_markup()
