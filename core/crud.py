@@ -1,4 +1,4 @@
-from typing import TypeVar, Optional
+from typing import Optional, TypeVar
 
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession

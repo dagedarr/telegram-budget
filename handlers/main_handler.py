@@ -2,15 +2,15 @@ from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from keyboards import main_keyboard, other_keyboard
+from config import Config
+from core.crud import get_by_attributes, remove
+from keyboards import back_to_menu_keyboard, main_keyboard, other_keyboard
+from models import Transaction
 from utils.transactions import (amount_validate, create_transaction,
                                 get_category_or_alias_id,
-                                parse_text_for_amount_and_category, get_transactions_message)
+                                get_transactions_message,
+                                parse_text_for_amount_and_category)
 from utils.user_actions import callback_message
-from core.crud import get_by_attributes, remove
-from models import Transaction
-from keyboards import back_to_menu_keyboard
-from config import Config
 
 router = Router(name='main_router')
 
