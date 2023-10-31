@@ -7,10 +7,10 @@ from filters import IsEndOnboardingFilter
 from keyboards import universal_keyboard
 from utils.user_actions import make_onboarding_end
 
-router = Router(name="cmd_router")
+router = Router(name='cmd_router')
 
 
-@router.message(IsEndOnboardingFilter(), Command(commands=["start"]))
+@router.message(IsEndOnboardingFilter(), Command(commands=['start']))
 async def cmd_start_onboarding(message: Message, session: AsyncSession):
     """Обработчик команды /start для завершенного онбординга"""
     keyboard = universal_keyboard([
@@ -28,7 +28,7 @@ async def cmd_start_onboarding(message: Message, session: AsyncSession):
     )
 
 
-@router.message(Command(commands=["start"]))
+@router.message(Command(commands=['start']))
 async def cmd_start(message: Message):
     keyboard = universal_keyboard(
         [('Ввести сведения о себе', 'registration')]
@@ -41,9 +41,8 @@ async def cmd_start(message: Message):
     )
 
 
-@router.message(Command(commands=["help"]))
+@router.message(Command(commands=['help']))
 async def cmd_help(message: Message):
-    raise NotImplementedError
     await message.answer(
         'FIXME'
     )
