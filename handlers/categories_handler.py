@@ -1,16 +1,16 @@
 from aiogram import F, Router
+from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
-from aiogram.fsm.context import FSMContext
 
-from keyboards import universal_keyboard, category_details_keyboard
-from utils.user_actions import callback_message
 from core.crud import get_by_attributes, get_or_create, update
-from models import Category
 from forms import CategoryForm, CategoryUpdateForm
+from keyboards import category_details_keyboard, universal_keyboard
+from models import Category
+from utils.categories import (CategoryActionsCallbackData,
+                              CategoryDetailsCallbackData)
 from utils.paginator import Paginator
-from utils.categories import CategoryDetailsCallbackData, CategoryActionsCallbackData
-
+from utils.user_actions import callback_message
 
 router = Router(name='category_router')
 

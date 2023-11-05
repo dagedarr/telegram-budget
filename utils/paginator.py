@@ -2,10 +2,10 @@ import contextlib
 from typing import Optional, Union
 
 from aiogram import Router, types
-from aiogram.filters.callback_data import CallbackData
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.filters.callback_data import CallbackData
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 paginator_router = Router()
 
@@ -182,7 +182,7 @@ class Paginator(metaclass=MetaSingleton):
     def _create_chunks(self, array, buttons=False):
         """Разбитие любого массива на требуемые чанки"""
         return [
-            array[i : i + self.items_on_page]
+            array[i: i + self.items_on_page]
             for i in range(0, len(array), self.items_on_page)
         ]
 
@@ -211,7 +211,7 @@ class Paginator(metaclass=MetaSingleton):
         buttons = list(builder.buttons)
         builder = InlineKeyboardBuilder()
         buttons = [
-            buttons[i : i + self.dynamic_buttons_items_in_rows]
+            buttons[i: i + self.dynamic_buttons_items_in_rows]
             for i in range(
                 0, len(buttons), self.dynamic_buttons_items_in_rows
             )
