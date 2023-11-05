@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.crud import get_by_id, update
 from filters import IsEndOnboardingFilter
-from forms.user_form import RegistrationForm
+from forms import RegistrationForm
 from keyboards import set_info_keyboard, universal_keyboard
 from models import User
 from utils.user_actions import callback_message
