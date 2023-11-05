@@ -12,6 +12,12 @@ class User(Base):
     registration_time = Column(BigInteger)  # Время в формате Unix.
     is_onboarding = Column(Boolean, default=False)
 
-    categories = relationship('Category', back_populates='user')
-    aliases = relationship('Alias', back_populates='user')
-    transactions = relationship('Transaction', back_populates='user')
+    categories = relationship(
+        'Category', back_populates='user', cascade='all, delete-orphan'
+    )
+    aliases = relationship(
+        'Alias', back_populates='user', cascade='all, delete-orphan'
+    )
+    transactions = relationship(
+        'Transaction', back_populates='user', cascade='all, delete-orphan'
+    )
