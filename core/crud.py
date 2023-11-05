@@ -29,11 +29,13 @@ async def get_or_create(
 
     instance = await session.execute(select(model).filter_by(**kwargs))
     instance = instance.scalars().one_or_none()
+    flag = True
 
     if not instance:
         instance = await session.execute(insert(model).values(**kwargs))
         await session.commit()
-    return instance
+        flag = False
+    return instance, flag
 
 
 async def update(
