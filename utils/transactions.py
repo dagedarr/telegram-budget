@@ -159,11 +159,13 @@ async def get_transactions_message(transactions):
     Returns:
         str: Текстовое сообщение с информацией о транзакциях.
     """
-    message = 'Список последних трат. Для удаление нажмите на /del_tr справа от траты.\n\n'
+
+    message = ('Список последних трат. Для удаление нажмите ' +
+               'на /del_tr справа от траты\n\n')
 
     # Создаем список строк для каждой транзакции
     transaction_strings = [
-        f'{transaction} /del_tr{transaction.id}' for transaction in transactions
+        f'{trans}; /del_tr{trans.id}' for trans in transactions
     ]
 
     # Объединяем строки в одну

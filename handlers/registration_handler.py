@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.crud import get_by_id, get_or_create, update
-from forms.user_form import RegistrationForm
+from forms import RegistrationForm
 from keyboards import set_info_keyboard, universal_keyboard
 from models import User
 from utils.user_actions import callback_message, make_onboarding_end
@@ -17,6 +17,7 @@ router = Router(name='registration_router')
 @router.callback_query(F.data == 'registration')
 async def registration(callback: CallbackQuery, session: AsyncSession):
     """Регистрация пользователя."""
+
     await get_or_create(
         model=User,
         session=session,
@@ -37,6 +38,7 @@ async def registration(callback: CallbackQuery, session: AsyncSession):
 @router.callback_query(F.data == 'get_mail')
 async def get_mail(callback: CallbackQuery, state: FSMContext):
     """Устанавливает state для получения почты."""
+
     await state.clear()
     await state.set_state(RegistrationForm.mail)
     await callback_message(
@@ -68,6 +70,7 @@ async def set_mail(
     callback: CallbackQuery, session: AsyncSession, state: FSMContext
 ):
     """Устанавливает почту в БД"""
+
     keyboard = universal_keyboard(
         [
             ('Поменять имя', 'get_username'),
@@ -97,6 +100,7 @@ async def set_mail(
 @router.callback_query(F.data == 'get_username')
 async def get_username(callback: CallbackQuery, state: FSMContext):
     """Устанавливает state для получения имени."""
+
     await state.clear()
     await state.set_state(RegistrationForm.username)
     await callback_message(
@@ -108,6 +112,7 @@ async def get_username(callback: CallbackQuery, state: FSMContext):
 @router.message(RegistrationForm.username)
 async def get_name_from_message(message: Message, state: FSMContext):
     """Получает имя из сообщения."""
+
     await state.update_data(username=message.text)
     keyboard = universal_keyboard(
         [
@@ -127,6 +132,7 @@ async def set_username(
     callback: CallbackQuery, session: AsyncSession, state: FSMContext
 ):
     """Устанавливает имя в БД"""
+
     keyboard = universal_keyboard(
         [
             ('Поменять почту', 'get_mail'),
@@ -155,6 +161,8 @@ async def set_username(
 
 @router.callback_query(F.data == 'registration_end')
 async def registration_end(callback: CallbackQuery, session: AsyncSession):
+    """Финальное сообщение регистрации."""
+
     keyboard = universal_keyboard([
         ('Меню', 'main')
     ])
