@@ -1,0 +1,1 @@
+from .paginator import paginator_router  # noqa
