@@ -6,11 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.crud import (get_by_attributes, get_by_id, get_or_create, remove,
                        update)
 from forms import CategoryForm, CategoryUpdateForm
-from keyboards import category_details_keyboard, universal_keyboard
+from keyboards import (add_category_keyboard, categories_list_keyboard,
+                       categories_menu_keyboard, category_details_keyboard,
+                       confirm_delete_category_keyboard,
+                       get_cat_title_keyboard, get_category_title_keyboard,
+                       go_to_new_category_keyboard, universal_keyboard)
 from models import Category
 from utils.categories import (CategoryActionsCallbackData,
                               CategoryDetailsCallbackData)
-from utils.paginator import Paginator
 from utils.user_actions import callback_message
 
 router = Router(name='category_router')
@@ -21,28 +24,16 @@ async def category_menu(callback: CallbackQuery, state: FSMContext):
     """Меню Категории."""
 
     await state.clear()
-    keyboard = universal_keyboard([
-        ('Мои Категории', 'categories_list'),
-        ('Добавить Категорию', 'get_category_from_user'),
-        ('Назад', 'other')
-    ])
-
     await callback_message(
         target=callback,
         text='Основное меню Категории',
-        reply_markup=keyboard
+        reply_markup=categories_menu_keyboard()
     )
 
 
 @router.callback_query(F.data == 'categories_list')
 async def categories_list(callback: CallbackQuery, session: AsyncSession):
     """Список категорий пользвоателя."""
-
-    keyboard = universal_keyboard(
-        [
-            ('Добавить Категорию', 'get_category_from_user'),
-            ('Назад', 'category_menu')
-        ])
 
     user_categories = await get_by_attributes(
         model=Category,
@@ -56,31 +47,11 @@ async def categories_list(callback: CallbackQuery, session: AsyncSession):
         await callback_message(
             target=callback,
             text='Вы не добавили ни одной категории :(',
-            reply_markup=keyboard
+            reply_markup=add_category_keyboard()
         )
         return
 
-    buttons = [
-        (
-            category.title,
-            CategoryDetailsCallbackData(
-                category_id=category.id,
-            ).pack(),
-        )
-        for category in user_categories
-    ]
-    paginator = Paginator(
-        paginator_id=callback.message.message_id,
-        dynamic_buttons=buttons,
-        dynamic_buttons_items_in_page=3,
-        dynamic_buttons_items_in_rows=1,
-    )
-
-    paginator.add_buttons(
-        universal_keyboard([
-            ('Назад', 'category_menu')
-        ])
-    )
+    paginator = categories_list_keyboard(callback, user_categories)
 
     await callback_message(
         target=callback,
@@ -127,21 +98,12 @@ async def confirm_delete_category(
         session=session
     )
 
-    keyboard = universal_keyboard([
-        (
-            'Удалить',
-            CategoryActionsCallbackData(
-                action='delete_category',
-                category_id=callback_data.category_id
-            ).pack()
-        ),
-        ('Отмена', 'category_menu')
-    ])
-
     await callback_message(
         target=callback,
         text=f'Вы точно хотите удалить Категорию "{category.title}"',
-        reply_markup=keyboard,
+        reply_markup=confirm_delete_category_keyboard(
+            callback_data.category_id
+        ),
     )
 
 
@@ -215,17 +177,9 @@ async def get_new_title_from_message(message: Message, state: FSMContext):
     data = await state.get_data()
     old_title = data.get('old_title')
 
-    keyboard = universal_keyboard(
-        [
-            ('Подтвердить', 'update_category_title'),
-            ('Отмена', 'category_menu')
-        ],
-        buttons_per_row=2,
-    )
-
     await message.answer(
         text=f'Переименовать "{old_title}" -> "{message.text}"?',
-        reply_markup=keyboard,
+        reply_markup=get_category_title_keyboard(),
     )
 
 
@@ -263,9 +217,7 @@ async def update_category_title(
         await callback_message(
             target=callback,
             text='Такая Категория уже существет :(',
-            reply_markup=universal_keyboard([
-                ('В меню', 'category_menu')
-            ]),
+            reply_markup=universal_keyboard([('В меню', 'category_menu')]),
         )
         return
 
@@ -277,20 +229,10 @@ async def update_category_title(
         session=session
     )
 
-    keyboard = universal_keyboard([
-        (
-            f'Перейти к "{new_title}"',
-            CategoryDetailsCallbackData(
-                category_id=category.id,
-            ).pack()
-        ),
-        ('Назад', 'category_menu'),
-    ])
-
     await callback_message(
         target=callback,
         text='Название успешно изменено!',
-        reply_markup=keyboard,
+        reply_markup=go_to_new_category_keyboard(new_title, category),
     )
 
 # ------------------------ ADD CATEGORY ------------------------
@@ -316,17 +258,9 @@ async def get_category_from_message(message: Message, state: FSMContext):
     """Получает название Категории из сообщения."""
 
     await state.update_data(cat_title=message.text)
-    keyboard = universal_keyboard(
-        [
-            ('Создать', 'set_category_title'),
-            ('Отмена', 'category_menu')
-        ],
-        buttons_per_row=2,
-    )
-
     await message.answer(
         text=f'Создать Категорию: "{message.text}"?',
-        reply_markup=keyboard,
+        reply_markup=get_cat_title_keyboard(),
     )
 
 
@@ -360,18 +294,12 @@ async def set_category_title(
         },
         session=session
     )
-    keyboard = universal_keyboard([
-        (
-            f'Перейти к "{category_title}"',
-            CategoryDetailsCallbackData(
-                category_id=category.id,
-            ).pack()
-        ),
-        ('Назад', 'category_menu'),
-    ])
 
     await callback_message(
         target=callback,
         text=text,
-        reply_markup=keyboard,
+        reply_markup=go_to_new_category_keyboard(
+            new_title=category_title,
+            category=category
+        ),
     )
