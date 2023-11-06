@@ -105,8 +105,10 @@ async def category_details(
     await callback_message(
         target=callback,
         text=f'Меню Категории "{category.title}"',
-        reply_markup=category_details_keyboard(category=category)
+        reply_markup=category_details_keyboard(category_id=category.id)
     )
+
+# ------------------------ DELETE CATEGORY ------------------------
 
 
 @router.callback_query(
@@ -233,7 +235,7 @@ async def get_new_title_from_message(message: Message, state: FSMContext):
 async def update_category_title(
     callback: CallbackQuery, session: AsyncSession, state: FSMContext
 ):
-    """Обновляет имя Категории в БД."""
+    """Обновляет имя Категории в БД если такого названия нет."""
 
     state_data = await state.get_data()
     new_title = state_data.get('new_title')
@@ -332,7 +334,7 @@ async def get_category_from_message(message: Message, state: FSMContext):
 async def set_category_title(
     callback: CallbackQuery, session: AsyncSession, state: FSMContext
 ):
-    """Создает Категорию в БД."""
+    """Создает Категорию в БД если ее нет."""
 
     state_data = await state.get_data()
     category_title = state_data.get('cat_title')
