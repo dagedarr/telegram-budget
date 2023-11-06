@@ -5,6 +5,8 @@ from core.db import Base
 
 
 class Category(Base):
+    """Модель Категории пользователя."""
+
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     title = Column(String(64), nullable=False)
 
@@ -22,6 +24,8 @@ class Category(Base):
 
 
 class Alias(Base):
+    """Модель Алиаса категории."""
+
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
     title = Column(String(64), nullable=False)
@@ -33,7 +37,7 @@ class Alias(Base):
         'Transaction', back_populates='alias', lazy='selectin')
 
     def __str__(self) -> str:
-        return self.title
+        return f'{self.title} ({self.category})'
 
     def __repr__(self) -> str:
-        return self.title
+        return f'{self.title} ({self.category})'

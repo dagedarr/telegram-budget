@@ -5,6 +5,8 @@ from core.db import Base
 
 
 class Transaction(Base):
+    """Модель Транзакции пользователя."""
+
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     category_id = Column(Integer, ForeignKey('category.id'), nullable=False)
 

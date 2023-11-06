@@ -5,7 +5,7 @@ from core.db import Base
 
 
 class User(Base):
-    """Модель пользователя"""
+    """Модель пользователя."""
 
     username = Column(String(64), nullable=True)
     email = Column(String(254), unique=True, index=True, nullable=True)
