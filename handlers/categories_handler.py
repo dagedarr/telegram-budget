@@ -3,7 +3,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.crud import get_by_attributes, get_or_create, remove, update
+from core.crud import (get_by_attributes, get_by_id, get_or_create, remove,
+                       update)
 from forms import CategoryForm, CategoryUpdateForm
 from keyboards import category_details_keyboard, universal_keyboard
 from models import Category
@@ -64,7 +65,6 @@ async def categories_list(callback: CallbackQuery, session: AsyncSession):
             category.title,
             CategoryDetailsCallbackData(
                 category_id=category.id,
-                category_title=category.title
             ).pack(),
         )
         for category in user_categories
@@ -93,31 +93,44 @@ async def categories_list(callback: CallbackQuery, session: AsyncSession):
 async def category_details(
     callback: CallbackQuery,
     callback_data: CategoryDetailsCallbackData,
+    session: AsyncSession
 ):
-    title = callback_data.category_title
+    """Меню конкретной Категории."""
+
+    category = await get_by_id(
+        model=Category,
+        obj_id=callback_data.category_id,
+        session=session
+    )
     await callback_message(
         target=callback,
-        text=f'Меню Категории "{title}"',
-        reply_markup=category_details_keyboard(category_title=title)
+        text=f'Меню Категории "{category.title}"',
+        reply_markup=category_details_keyboard(category=category)
     )
 
 
 @router.callback_query(
-    CategoryActionsCallbackData.filter(F.action == 'confirm_delete_category')
+    CategoryActionsCallbackData.filter(F.action == 'confirm_del_cat')
 )
 async def confirm_delete_category(
     callback: CallbackQuery,
     callback_data: CategoryActionsCallbackData,
+    session: AsyncSession
 ):
     """Подтверждение удаления Категории."""
 
-    category_title = callback_data.title
+    category = await get_by_id(
+        model=Category,
+        obj_id=callback_data.category_id,
+        session=session
+    )
+
     keyboard = universal_keyboard([
         (
             'Удалить',
             CategoryActionsCallbackData(
                 action='delete_category',
-                title=category_title,
+                category_id=callback_data.category_id
             ).pack()
         ),
         ('Отмена', 'category_menu')
@@ -125,7 +138,7 @@ async def confirm_delete_category(
 
     await callback_message(
         target=callback,
-        text=f'Вы точно хотите удалить Категорию "{category_title}"',
+        text=f'Вы точно хотите удалить Категорию "{category.title}"',
         reply_markup=keyboard,
     )
 
@@ -140,12 +153,10 @@ async def delete_category(
 ):
     """Удаление Категории."""
 
-    category_title = callback_data.title
-
     category = await get_by_attributes(
         model=Category,
         attributes={
-            'title': category_title,
+            'id': callback_data.category_id,
             'user_id': callback.from_user.id
         },
         session=session
@@ -157,7 +168,7 @@ async def delete_category(
 
     await callback_message(
         target=callback,
-        text=f'Категория "{category_title}" успешно удалена!',
+        text=f'Категория "{category.title}" успешно удалена!',
         reply_markup=universal_keyboard([(('В меню', 'category_menu'))]),
     )
 
@@ -171,16 +182,26 @@ async def rename_category(
     callback: CallbackQuery,
     state: FSMContext,
     callback_data: CategoryActionsCallbackData,
+    session: AsyncSession
 ):
     """Устанавливает state для получения названия Категории."""
 
     await state.clear()
     await state.set_state(CategoryUpdateForm.new_title)
-    await state.update_data(old_title=callback_data.title)
+    category = await get_by_attributes(
+        model=Category,
+        attributes={
+            'id': callback_data.category_id,
+            'user_id': callback.from_user.id
+        },
+        session=session
+    )
+
+    await state.update_data(old_title=category.title)
 
     await callback_message(
         target=callback,
-        text=f'Введите новое название для Категории "{callback_data.title}"'
+        text=f'Введите новое название для Категории "{category.title}"'
     )
 
 
@@ -259,7 +280,6 @@ async def update_category_title(
             f'Перейти к "{new_title}"',
             CategoryDetailsCallbackData(
                 category_id=category.id,
-                category_title=category.title
             ).pack()
         ),
         ('Назад', 'category_menu'),
@@ -330,12 +350,19 @@ async def set_category_title(
     else:
         text = f'Категория "{category_title}" Успешно создана!'
 
+    category = await get_by_attributes(
+        model=Category,
+        attributes={
+            'user_id': callback.from_user.id,
+            'title': category_title
+        },
+        session=session
+    )
     keyboard = universal_keyboard([
         (
             f'Перейти к "{category_title}"',
             CategoryDetailsCallbackData(
                 category_id=category.id,
-                category_title=category.title
             ).pack()
         ),
         ('Назад', 'category_menu'),

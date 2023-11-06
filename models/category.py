@@ -15,10 +15,10 @@ class Category(Base):
     transactions = relationship('Transaction', back_populates='category')
 
     def __str__(self) -> str:
-        return self.title
+        return str(self.title)
 
     def __repr__(self) -> str:
-        return self.title
+        return str(self.title)
 
 
 class Alias(Base):

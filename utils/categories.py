@@ -2,15 +2,14 @@ from aiogram.filters.callback_data import CallbackData
 
 
 class CategoryDetailsCallbackData(
-    CallbackData, prefix='cat_details'
+    CallbackData, prefix='cat_det'
 ):
     category_id: int
-    category_title: str
 
 
 class CategoryActionsCallbackData(
     CallbackData,
-    prefix='cat_actions'
+    prefix='cat_act'
 ):
     action: str
-    title: str
+    category_id: int

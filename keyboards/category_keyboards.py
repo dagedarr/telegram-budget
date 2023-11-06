@@ -1,17 +1,22 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from models import Category
 from utils.categories import CategoryActionsCallbackData
 
 
-def category_details_keyboard(category_title: str) -> InlineKeyboardMarkup:
+def category_details_keyboard(category: Category) -> InlineKeyboardMarkup:
     """Клавиатура Категории."""
 
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
             text='Алиасы',
-            callback_data='category_aliases',
+            callback_data='aliases_menu',
+            # callback_data=CategoryActionsCallbackData(
+            #     action='aliases_menu',
+            #     title=category
+            # ).pack()
         )
     )
     builder.row(
@@ -19,14 +24,16 @@ def category_details_keyboard(category_title: str) -> InlineKeyboardMarkup:
             text='Переименовать',
             callback_data=CategoryActionsCallbackData(
                 action='rename_category',
-                title=category_title
+                # title=category.title
+                category_id=category.id
             ).pack()
         ),
         InlineKeyboardButton(
             text='Удалить',
             callback_data=CategoryActionsCallbackData(
-                action='confirm_delete_category',
-                title=category_title
+                action='confirm_del_cat',
+                # title=category.title
+                category_id=category.id
             ).pack(),
         ),
     ),
