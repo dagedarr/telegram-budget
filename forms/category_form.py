@@ -8,3 +8,7 @@ class CategoryForm(StatesGroup):
 class CategoryUpdateForm(StatesGroup):
     old_title = State()
     new_title = State()
+
+
+class AliasForm(StatesGroup):
+    title = State()
