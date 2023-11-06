@@ -18,6 +18,7 @@ router = Router(name='main_router')
 @router.callback_query(F.data == 'main')
 async def main(callback: CallbackQuery):
     """Обрабатывает основные функции бота."""
+
     await callback_message(
         target=callback,
         text='Основной функционал бота',
@@ -75,6 +76,7 @@ async def del_last_transaction(callback: CallbackQuery, session: AsyncSession):
 @router.callback_query(F.data == 'other')
 async def other(callback: CallbackQuery):
     """Выводит Категории и Статистику и остальной функционал."""
+
     await callback_message(
         target=callback,
         text='Просмотр Категории и Статистики',
@@ -85,6 +87,8 @@ async def other(callback: CallbackQuery):
 
 @router.message(F.text)
 async def get_transactions(message: Message, session: AsyncSession):
+    """FIXME дописать."""
+
     amount, title = await parse_text_for_amount_and_category(
         text=message.text
     )
