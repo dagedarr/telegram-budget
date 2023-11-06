@@ -24,7 +24,10 @@ def category_details_keyboard(category_title: str) -> InlineKeyboardMarkup:
         ),
         InlineKeyboardButton(
             text='Удалить',
-            callback_data='delete_category',
+            callback_data=CategoryActionsCallbackData(
+                action='confirm_delete_category',
+                title=category_title
+            ).pack(),
         ),
     ),
     builder.row(

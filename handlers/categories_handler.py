@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.crud import get_by_attributes, get_or_create, update
+from core.crud import get_by_attributes, get_or_create, remove, update
 from forms import CategoryForm, CategoryUpdateForm
 from keyboards import category_details_keyboard, universal_keyboard
 from models import Category
@@ -102,7 +102,67 @@ async def category_details(
     )
 
 
+@router.callback_query(
+    CategoryActionsCallbackData.filter(F.action == 'confirm_delete_category')
+)
+async def confirm_delete_category(
+    callback: CallbackQuery,
+    callback_data: CategoryActionsCallbackData,
+):
+    """Подтверждение удаления Категории."""
+
+    category_title = callback_data.title
+    keyboard = universal_keyboard([
+        (
+            'Удалить',
+            CategoryActionsCallbackData(
+                action='delete_category',
+                title=category_title,
+            ).pack()
+        ),
+        ('Отмена', 'category_menu')
+    ])
+
+    await callback_message(
+        target=callback,
+        text=f'Вы точно хотите удалить Категорию "{category_title}"',
+        reply_markup=keyboard,
+    )
+
+
+@router.callback_query(
+    CategoryActionsCallbackData.filter(F.action == 'delete_category')
+)
+async def delete_category(
+    callback: CallbackQuery,
+    callback_data: CategoryActionsCallbackData,
+    session: AsyncSession
+):
+    """Удаление Категории."""
+
+    category_title = callback_data.title
+
+    category = await get_by_attributes(
+        model=Category,
+        attributes={
+            'title': category_title,
+            'user_id': callback.from_user.id
+        },
+        session=session
+    )
+    await remove(
+        db_obj=category,
+        session=session
+    )
+
+    await callback_message(
+        target=callback,
+        text=f'Категория "{category_title}" успешно удалена!',
+        reply_markup=universal_keyboard([(('В меню', 'category_menu'))]),
+    )
+
 # ------------------------ RENAME CATEGORY ------------------------
+
 
 @router.callback_query(
     CategoryActionsCallbackData.filter(F.action == 'rename_category')
