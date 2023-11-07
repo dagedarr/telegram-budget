@@ -13,3 +13,11 @@ class Config:
     ROOT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 
     LATEST_TRANSACTIONS_NUM: int = 5
+    PAGINATOR_BUTTONS: int = 5
+
+    REDIS_URL: str = os.getenv('REDIS_URL')
+    SMTP_HOST: str = 'smtp.gmail.com'
+    SMTP_PORT: int = 465
+
+    SMTP_USER: str = os.getenv('SMTP_USER')  # Логин
+    SMTP_PASSWORD: str = os.getenv('SMTP_PASSWORD')  # Пароль

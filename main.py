@@ -26,3 +26,7 @@ async def main() -> None:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     asyncio.run(main())
+
+
+# celery -A tasks.tasks:app worker --loglevel=INFO --pool=solo
+# celery -A tasks.tasks:app flower
