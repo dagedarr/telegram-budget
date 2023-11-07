@@ -8,6 +8,7 @@ from .change_info_handler import router as change_info_router
 from .commands_handler import router as command_router
 from .main_handler import router as main_router
 from .registration_handler import router as registration_router
+from .statistic_handler import router as statistic_router
 
 handlers_router = Router()
 
@@ -17,6 +18,7 @@ handlers_router.include_routers(
     command_router,
     registration_router,
     category_router,
+    statistic_router,
     aliases_router,
     main_router,
 )
