@@ -1,6 +1,9 @@
-from .category_keyboards import (add_category_keyboard,  # noqa
-                                 alias_details_keyboard, aliases_menu_keyboard,
-                                 categories_list_keyboard,
+from .alias_keyboards import (add_alias_keyboard, alias_details_keyboard,  # noqa
+                              aliases_list_keyboard, aliases_menu_keyboard,
+                              confirm_del_alias_keyboard,
+                              delete_alias_keyboard, get_alias_title_keyboard,
+                              go_to_alias_keyboard)
+from .category_keyboards import (add_category_keyboard, categories_list_keyboard,  # noqa 
                                  categories_menu_keyboard,
                                  category_details_keyboard,
                                  confirm_delete_category_keyboard,

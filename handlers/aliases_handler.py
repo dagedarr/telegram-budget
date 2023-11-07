@@ -5,13 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.crud import get_by_attributes, get_by_id, get_or_create, remove
 from forms import AliasForm
-from keyboards import (alias_details_keyboard, aliases_menu_keyboard,
-                       universal_keyboard)
+from keyboards import (add_alias_keyboard, alias_details_keyboard,
+                       aliases_list_keyboard, aliases_menu_keyboard,
+                       confirm_del_alias_keyboard, delete_alias_keyboard,
+                       get_alias_title_keyboard, go_to_alias_keyboard)
 from models import Alias, Category
 from utils.categories import (AliasDetailsCallbackData,
                               AliasesActionsCallbackData,
                               AliasesCategoryCallbackData)
-from utils.paginator import Paginator
 from utils.user_actions import callback_message
 
 router = Router(name='aliases_router')
@@ -58,23 +59,6 @@ async def aliases_list(
         obj_id=callback_data.category_id,
         session=session
     )
-    keyboard = universal_keyboard(
-        [
-            (
-                'Добавить Алиас',
-                AliasesCategoryCallbackData(
-                    action='get_alias_from_user',
-                    category_id=category.id
-                ).pack()
-            ),
-            (
-                'Назад',
-                AliasesCategoryCallbackData(
-                    action='aliases_menu',
-                    category_id=category.id
-                ).pack()
-            )
-        ])
 
     category_aliases = await get_by_attributes(
         model=Alias,
@@ -89,36 +73,11 @@ async def aliases_list(
         await callback_message(
             target=callback,
             text='Вы не добавили к категорию ни одного Алиаса :(',
-            reply_markup=keyboard
+            reply_markup=add_alias_keyboard(category_id=category.id)
         )
         return
 
-    buttons = [
-        (
-            alias.title,
-            AliasDetailsCallbackData(
-                alias_id=alias.id,
-                category_id=category.id
-            ).pack(),
-        )
-        for alias in category_aliases
-    ]
-    paginator = Paginator(
-        paginator_id=callback.message.message_id,
-        dynamic_buttons=buttons,
-        dynamic_buttons_items_in_page=3,
-        dynamic_buttons_items_in_rows=1,
-    )
-
-    paginator.add_buttons(
-        universal_keyboard([(
-            'Назад',
-            AliasesCategoryCallbackData(
-                action='aliases_menu',
-                category_id=category.id
-            ).pack()
-        )])
-    )
+    paginator = aliases_list_keyboard(callback, category.id, category_aliases)
 
     await callback_message(
         target=callback,
@@ -170,28 +129,13 @@ async def confirm_delete_alias(
         session=session
     )
 
-    keyboard = universal_keyboard([
-        (
-            'Удалить',
-            AliasesActionsCallbackData(
-                action='delete_alias',
-                category_id=callback_data.category_id,
-                alias_id=callback_data.alias_id,
-            ).pack()
-        ),
-        (
-            'Отмена',
-            AliasesCategoryCallbackData(
-                action='aliases_menu',
-                category_id=callback_data.category_id
-            ).pack()
-        )
-    ])
-
     await callback_message(
         target=callback,
         text=f'Вы точно хотите удалить Алиас "{alias}"',
-        reply_markup=keyboard,
+        reply_markup=confirm_del_alias_keyboard(
+            category_id=callback_data.category_id,
+            alias_id=callback_data.alias_id
+        ),
     )
 
 
@@ -221,15 +165,7 @@ async def delete_alias(
     await callback_message(
         target=callback,
         text=f'Алиас "{alias}" успешно удален!',
-        reply_markup=universal_keyboard([(
-            (
-                'В меню',
-                AliasesCategoryCallbackData(
-                    action='aliases_menu',
-                    category_id=callback_data.category_id
-                ).pack()
-            )
-        )]),
+        reply_markup=delete_alias_keyboard(callback_data.category_id)
     )
 
 
@@ -263,23 +199,10 @@ async def get_alias_from_message(message: Message, state: FSMContext):
     category_id = state_data.get('category_id')
 
     await state.update_data(alias_title=message.text)
-    keyboard = universal_keyboard(
-        [
-            ('Создать', 'set_alias_title'),
-            (
-                'Отмена',
-                AliasesCategoryCallbackData(
-                    action='aliases_menu',
-                    category_id=category_id
-                ).pack()
-            )
-        ],
-        buttons_per_row=2,
-    )
 
     await message.answer(
         text=f'Создать Алиас: "{message.text}"?',
-        reply_markup=keyboard,
+        reply_markup=get_alias_title_keyboard(category_id=category_id),
     )
 
 
@@ -302,11 +225,6 @@ async def set_alias_title(
     )
     await state.clear()
 
-    if is_get:
-        text = f'Алиас "{alias_title}" Уже был создан Вами!'
-    else:
-        text = f'Алиас "{alias_title}" Успешно создан!'
-
     alias = await get_by_attributes(
         model=Alias,
         attributes={
@@ -316,25 +234,18 @@ async def set_alias_title(
         },
         session=session
     )
-    keyboard = universal_keyboard([
-        (
-            f'Перейти к "{alias_title}"',
-            AliasDetailsCallbackData(
-                alias_id=alias.id,
-                category_id=alias.category_id
-            ).pack()
-        ),
-        (
-            'Назад',
-            AliasesCategoryCallbackData(
-                action='aliases_menu',
-                category_id=category_id
-            ).pack()
-        ),
-    ])
+
+    if is_get:
+        text = f'Алиас "{alias_title}" Уже был создан Вами!'
+    else:
+        text = f'Алиас "{alias_title}" Успешно создан!'
 
     await callback_message(
         target=callback,
         text=text,
-        reply_markup=keyboard,
+        reply_markup=go_to_alias_keyboard(
+            category_id=category_id,
+            alias_id=alias.id,
+            alias_title=alias_title
+        ),
     )
