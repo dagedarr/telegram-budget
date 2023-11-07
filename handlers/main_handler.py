@@ -4,7 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import Config
 from core.crud import get_by_attributes, remove
-from keyboards import back_to_menu_keyboard, main_keyboard, other_keyboard
+from keyboards import (back_to_menu_keyboard, main_keyboard, other_keyboard,
+                       universal_keyboard)
 from models import Transaction
 from utils.transactions import (amount_validate, create_transaction,
                                 get_category_or_alias_id,
@@ -87,7 +88,10 @@ async def other(callback: CallbackQuery):
 
 @router.message(F.text)
 async def get_transactions(message: Message, session: AsyncSession):
-    """FIXME дописать."""
+    """
+    Обработчик Транзакций пользователя.
+    Создает Транзакцию по введененным значениям суммы и категории (алиаса).
+    """
 
     amount, title = await parse_text_for_amount_and_category(
         text=message.text
@@ -96,11 +100,9 @@ async def get_transactions(message: Message, session: AsyncSession):
         return
 
     if not title:
-        # FIXME
-        # надо предложить создать категорию или добавить трату в "Категория по умолчанию"
         await callback_message(
             target=message,
-            text='Я не смог обнаружить категорию в вашем сообщении :(',
+            text='Я не смог обнаружить Категорию в вашем сообщении :(',
             delete_reply=False
         )
         return
@@ -112,9 +114,13 @@ async def get_transactions(message: Message, session: AsyncSession):
     )
 
     if category_or_alias_id is None:
-        # FIXME
-        # Категория не найдена, надо предложить создать категорию или алиас с таким названием
-        print('Категория или Алиас с таким названием не найдены :(')
+        await callback_message(
+            target=message,
+            text=('Категория или Алиас с таким названием не найдены :(\n'
+                  + 'Создайте ее или попрубуйте ввести название еще раз!'),
+            reply_markup=universal_keyboard([('Категории', 'category_menu')]),
+            delete_reply=False
+        )
         return
 
     new_transaction = await create_transaction(

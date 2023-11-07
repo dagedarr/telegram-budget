@@ -73,8 +73,8 @@ async def get_category_or_alias_id(
         session (AsyncSession): Сессия SQLAlchemy.
 
     Returns:
-        Tuple[Optional[int], Optional[int]]: Кортеж с id категории и алиаса
-        (если найдены).
+        Optional[Tuple[Optional[int], Optional[int]]]: Кортеж с id категории
+        и алиаса(если найдены).
     """
 
     category: Optional[Category] = await get_by_attributes(
@@ -108,12 +108,6 @@ async def get_category_or_alias_id(
     if alias:
         return alias.category_id, alias.id
 
-    await callback_message(
-        target=message,
-        text='Неопознанная категория или алиас',
-        delete_reply=False
-    )
-    # return None, None
 
 
 async def create_transaction(
