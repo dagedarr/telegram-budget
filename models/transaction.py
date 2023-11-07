@@ -26,10 +26,10 @@ class Transaction(Base):
 
     def __str__(self) -> str:
         if self.alias:
-            return f'{self.amount} -> {self.alias} ({self.category})'
+            return f'{self.amount} -> {self.alias}'
         return f'{self.amount} -> {self.category}'
 
     def __repr__(self) -> str:
         if self.alias:
-            return f'{self.amount} -> {self.alias} ({self.category})'
+            return f'{self.amount} -> {self.alias}'
         return f'{self.amount} -> {self.category}'

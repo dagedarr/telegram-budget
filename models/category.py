@@ -14,7 +14,9 @@ class Category(Base):
     aliases = relationship(
         'Alias', back_populates='category', cascade='all, delete-orphan'
     )
-    transactions = relationship('Transaction', back_populates='category')
+    transactions = relationship(
+        'Transaction', back_populates='category', cascade='all, delete-orphan'
+    )
 
     def __str__(self) -> str:
         return str(self.title)
