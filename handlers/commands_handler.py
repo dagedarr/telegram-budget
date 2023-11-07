@@ -12,7 +12,8 @@ router = Router(name='cmd_router')
 
 @router.message(IsEndOnboardingFilter(), Command(commands=['start']))
 async def cmd_start_onboarding(message: Message, session: AsyncSession):
-    """Обработчик команды /start для завершенного онбординга"""
+    """Обработчик команды /start для завершенного онбординга."""
+
     keyboard = universal_keyboard([
         ('Меню', 'main')
     ])
@@ -30,6 +31,8 @@ async def cmd_start_onboarding(message: Message, session: AsyncSession):
 
 @router.message(Command(commands=['start']))
 async def cmd_start(message: Message):
+    """Обработчик команды /start для нового пользователя."""
+
     keyboard = universal_keyboard(
         [('Ввести сведения о себе', 'registration')]
     )

@@ -31,6 +31,7 @@ def main_keyboard():
     """
     Основная клавиатура пользователя.
     """
+
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
@@ -56,6 +57,7 @@ def other_keyboard():
     """
     Клавиатура "Остальное".
     """
+
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
@@ -87,6 +89,7 @@ def set_info_keyboard(is_onboarding=False):
     """
     Клавиатура изменения данных пользователя.
     """
+
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(
         text='Ввести почту' if is_onboarding else 'Поменять почту',

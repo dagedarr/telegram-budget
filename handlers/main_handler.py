@@ -116,9 +116,9 @@ async def get_transactions(message: Message, session: AsyncSession):
     if category_or_alias_id is None:
         await callback_message(
             target=message,
-            text=('Категория или Алиас с таким названием не найдены :(\n'
-                  + 'Создайте ее или попрубуйте ввести название еще раз!'),
-            reply_markup=universal_keyboard([('Категории', 'category_menu')]),
+            text='Категория или Алиас с таким названием не найдены :(\n'
+                 'Создайте ее или попрубуйте ввести название еще раз!',
+            reply_markup=universal_keyboard([('Создать', 'category_menu')]),
             delete_reply=False
         )
         return
