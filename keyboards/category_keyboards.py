@@ -5,6 +5,7 @@ from utils.categories import (AliasesCategoryCallbackData,
                               CategoryActionsCallbackData,
                               CategoryDetailsCallbackData)
 from utils.paginator import Paginator
+from config import Config
 
 
 def categories_menu_keyboard() -> InlineKeyboardMarkup:
@@ -66,7 +67,7 @@ def categories_list_keyboard(callback, user_categories) -> Paginator:
     paginator = Paginator(
         paginator_id=callback.message.message_id,
         dynamic_buttons=buttons,
-        dynamic_buttons_items_in_page=3,
+        dynamic_buttons_items_in_page=Config.PAGINATOR_BUTTONS,
         dynamic_buttons_items_in_rows=1,
     )
 
