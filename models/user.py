@@ -13,11 +13,13 @@ class User(Base):
     is_onboarding = Column(Boolean, default=False)
 
     categories = relationship(
-        'Category', back_populates='user', cascade='all, delete-orphan'
+        'Category', back_populates='user',
+        cascade='all, delete-orphan', lazy='selectin'
     )
     aliases = relationship(
         'Alias', back_populates='user', cascade='all, delete-orphan'
     )
     transactions = relationship(
-        'Transaction', back_populates='user', cascade='all, delete-orphan'
+        'Transaction', back_populates='user',
+        cascade='all, delete-orphan', lazy='selectin'
     )

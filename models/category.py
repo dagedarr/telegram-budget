@@ -12,10 +12,10 @@ class Category(Base):
 
     user = relationship('User', back_populates='categories')
     aliases = relationship(
-        'Alias', back_populates='category', cascade='all, delete-orphan'
+        'Alias', back_populates='category', cascade='all, delete-orphan', lazy='selectin'
     )
     transactions = relationship(
-        'Transaction', back_populates='category', cascade='all, delete-orphan'
+        'Transaction', back_populates='category', cascade='all, delete-orphan', lazy='selectin'
     )
 
     def __str__(self) -> str:

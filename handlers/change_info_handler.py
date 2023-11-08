@@ -26,6 +26,7 @@ async def change_info(callback: CallbackQuery):
 @router.message(IsEndOnboardingFilter(), RegistrationForm.mail)
 async def get_mail_from_message(message: Message, state: FSMContext):
     """Получает почту из сообщения."""
+
     await state.update_data(mail=message.text)
     keyboard = universal_keyboard(
         [
@@ -48,7 +49,8 @@ async def get_mail_from_message(message: Message, state: FSMContext):
 async def set_mail(
     callback: CallbackQuery, session: AsyncSession, state: FSMContext
 ):
-    """Устанавливает почту в БД"""
+    """Устанавливает почту в БД."""
+
     keyboard = universal_keyboard(
         [
             ('Поменять имя', 'get_username'),
@@ -75,6 +77,7 @@ async def set_mail(
 @router.message(IsEndOnboardingFilter(), RegistrationForm.username)
 async def get_name_from_message(message: Message, state: FSMContext):
     """Получает имя из сообщения."""
+
     await state.update_data(username=message.text)
     keyboard = universal_keyboard(
         [
@@ -97,7 +100,8 @@ async def get_name_from_message(message: Message, state: FSMContext):
 async def set_username(
     callback: CallbackQuery, session: AsyncSession, state: FSMContext
 ):
-    """Устанавливает имя в БД"""
+    """Устанавливает имя в БД."""
+
     keyboard = universal_keyboard(
         [
             ('Поменять почту', 'get_mail'),
