@@ -15,6 +15,7 @@ class Config:
     LATEST_TRANSACTIONS_NUM: int = 5
     PAGINATOR_BUTTONS: int = 5
 
+    DATE_FORMAT: str = '%d.%m.%Y'
     REDIS_URL: str = os.getenv('REDIS_URL')
     SMTP_HOST: str = 'smtp.gmail.com'
     SMTP_PORT: int = 465
