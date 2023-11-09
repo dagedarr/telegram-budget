@@ -2,6 +2,7 @@ import smtplib
 from email.message import EmailMessage
 
 from celery import Celery
+
 from config import Config
 
 app = Celery('tasks', broker=Config.REDIS_URL)
@@ -20,7 +21,7 @@ def get_email_template(user_email: str, subject: str, text: str):
     return email
 
 
-# @app.task
+@app.task
 def send_email_statistic(user_email: str, subject: str, text: str):
     """Отправляет заданному пользователю на почту отчет."""
 
