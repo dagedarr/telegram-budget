@@ -2,13 +2,18 @@ from datetime import datetime
 from re import findall, match, search
 from typing import Optional, Tuple, Union
 
+from aiogram.filters.callback_data import CallbackData
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.crud import create, get_by_attributes
+from core.crud import create, get_by_attributes, get_by_id
 from models import Alias, Category, Transaction
 
 from .user_actions import callback_message
+
+
+class TransactionCallbackData(CallbackData, prefix='transaction'):
+    trans_id: int
 
 
 async def parse_text_for_amount_and_category(
@@ -109,7 +114,6 @@ async def get_category_or_alias_id(
         return alias.category_id, alias.id
 
 
-
 async def create_transaction(
     session: AsyncSession,
     user_id: int,
@@ -166,3 +170,17 @@ async def get_transactions_message(transactions):
     message += '\n'.join(transaction_strings)
 
     return message
+
+
+async def validate_transaction_for_del(
+    transaction_id_from_msg: int,
+    transaction: Transaction,
+    user_id: int,
+) -> Optional[str]:
+
+    if not transaction_id_from_msg:
+        return 'Выберите транзакцию для удаления!\nНапример, /del_tr198'
+
+    print(transaction.user_id)
+    if not transaction or user_id != transaction.user_id:
+        return 'Это не Ваша транзакция!'
