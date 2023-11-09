@@ -1,9 +1,12 @@
 from aiogram import F, Router
+from aiogram.exceptions import TelegramBadRequest
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.crud import get_by_id
+from filters import IsEndOnboardingFilter
 from keyboards import (back_to_menu_keyboard, choose_interval_keyboard,
                        confirm_mail_keyboard, get_statistic_keyboard,
                        statistic_menu_keyboard)
@@ -16,18 +19,22 @@ from utils.user_actions import callback_message
 router = Router(name='statistic_router')
 
 
+@router.message(IsEndOnboardingFilter(), Command(commands=['statistic']))
 @router.callback_query(F.data == 'statistic_menu')
 async def statistic_menu(callback: CallbackQuery, state: FSMContext):
     """Меню Статистики."""
 
     await state.clear()
 
-    await callback_message(
-        target=callback,
-        text='Основное меню Статистики. Выберите за какой срок '
-             'вы хотите получить информацию.',
-        reply_markup=statistic_menu_keyboard()
-    )
+    try:
+        await callback_message(
+            target=callback,
+            text='Основное меню Статистики. Выберите за какой срок '
+                 'вы хотите получить информацию.',
+            reply_markup=statistic_menu_keyboard()
+        )
+    except TelegramBadRequest:
+        pass
 
 
 @router.callback_query(
@@ -119,9 +126,10 @@ async def send_statistic_to_email(
         session=session,
         mail_mode=True
     )
-    send_email_statistic(
+    label = get_interval_label(time_interval)[1]
+    send_email_statistic.delay(
         user_email=user.email,
-        subject=f'Отчет от telegram-budget {get_interval_label(time_interval)[1]}',
+        subject=f'Отчет от telegram-budget {label}',
         text=text
     )
 

@@ -9,13 +9,14 @@ from config import Config
 from core.db import AsyncSessionLocal
 from core.db_middleware import DbSessionMiddleware
 from handlers import handlers_router
-
+from utils.middlewares import ChatClearMiddleware
 
 dp = Dispatcher()
 
 
 async def main() -> None:
     bot = Bot(token=Config.API_TOKEN, parse_mode=ParseMode.HTML)
+    dp.update.middleware(ChatClearMiddleware())
     dp.update.middleware(
         DbSessionMiddleware(session_pool=AsyncSessionLocal)
     )
@@ -28,5 +29,5 @@ if __name__ == "__main__":
     asyncio.run(main())
 
 
-# celery -A tasks.tasks:app worker --loglevel=INFO --pool=solo
-# celery -A tasks.tasks:app flower
+# celery -A tasks.mail_send:app worker --loglevel=INFO --pool=solo
+# celery -A tasks.mail_send:app flower

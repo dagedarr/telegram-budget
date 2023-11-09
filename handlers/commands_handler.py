@@ -17,7 +17,7 @@ from utils.user_actions import callback_message, make_onboarding_end
 router = Router(name='cmd_router')
 
 
-@router.message(IsEndOnboardingFilter(), Command(commands=['start']))
+@router.message(IsEndOnboardingFilter(), Command(commands=['start', 'menu']))
 async def cmd_start_onboarding(message: Message, session: AsyncSession):
     """Обработчик команды /start для завершенного онбординга."""
 
@@ -50,7 +50,14 @@ async def cmd_start(message: Message):
 @router.message(Command(commands=['help']))
 async def cmd_help(message: Message):
     await message.answer(
-        'FIXME'
+        'Основные возможности телеграм бота:\n\n'
+        '1. Добавление расхода определенной категории формата путем ввода '
+        '"1000 Продукты"\n'
+        '2. Добавление категорий и аллиасов к ним в соответсвующем меню\n'
+        '3. Вывод статистики в меню либо /statistic\n'
+        '4. Вы всегда можете вернуться в /menu\n\n'
+        'Если у Вас есть пожелания или предложения связаться '
+        'с создателем @nilotan'
     )
 
 
