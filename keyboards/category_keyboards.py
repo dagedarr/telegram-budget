@@ -1,11 +1,11 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from config import Config
 from utils.categories import (AliasesCategoryCallbackData,
                               CategoryActionsCallbackData,
                               CategoryDetailsCallbackData)
 from utils.paginator import Paginator
-from config import Config
 
 
 def categories_menu_keyboard() -> InlineKeyboardMarkup:

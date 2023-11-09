@@ -1,4 +1,5 @@
 from aiogram import F, Router
+from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,9 +18,10 @@ router = Router(name='main_router')
 
 
 @router.callback_query(F.data == 'main')
-async def main(callback: CallbackQuery):
+async def main(callback: CallbackQuery, state: FSMContext):
     """Обрабатывает основные функции бота."""
 
+    await state.clear()
     await callback_message(
         target=callback,
         text='Основной функционал бота',
@@ -61,6 +63,13 @@ async def del_last_transaction(callback: CallbackQuery, session: AsyncSession):
         order_by='date',
         session=session,
     )
+    if not last_transaction:
+        await callback_message(
+            target=callback,
+            text='У Вас нет истории Трат!',
+            reply_markup=back_to_menu_keyboard()
+        )
+        return
 
     await remove(
         db_obj=last_transaction,
