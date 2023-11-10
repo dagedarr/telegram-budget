@@ -27,10 +27,8 @@ def universal_keyboard(
     return builder.as_markup()
 
 
-def main_keyboard():
-    """
-    Основная клавиатура пользователя.
-    """
+def main_keyboard() -> InlineKeyboardMarkup:
+    """Основная клавиатура пользователя."""
 
     builder = InlineKeyboardBuilder()
     builder.row(
@@ -53,10 +51,8 @@ def main_keyboard():
     return builder.as_markup()
 
 
-def other_keyboard():
-    """
-    Клавиатура "Остальное".
-    """
+def other_keyboard() -> InlineKeyboardMarkup:
+    """Клавиатура "Остальное"."""
 
     builder = InlineKeyboardBuilder()
     builder.row(
@@ -85,10 +81,8 @@ def other_keyboard():
     return builder.as_markup()
 
 
-def set_info_keyboard(is_onboarding=False):
-    """
-    Клавиатура изменения данных пользователя.
-    """
+def set_info_keyboard(is_onboarding=False) -> InlineKeyboardMarkup:
+    """Клавиатура изменения данных пользователя."""
 
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(
@@ -113,7 +107,9 @@ def set_info_keyboard(is_onboarding=False):
     return builder.as_markup()
 
 
-def back_to_menu_keyboard():
+def back_to_menu_keyboard() -> InlineKeyboardMarkup:
+    """Клавиатура возврата в основное меню."""
+
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(
         text='Вернуться в меню',

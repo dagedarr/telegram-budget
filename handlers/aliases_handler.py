@@ -195,6 +195,7 @@ async def get_alias_from_user(
 @router.message(AliasForm.title)
 async def get_alias_from_message(message: Message, state: FSMContext):
     """Получает название Алиаса из сообщения."""
+
     state_data = await state.get_data()
     category_id = state_data.get('category_id')
 

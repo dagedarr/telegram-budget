@@ -14,6 +14,11 @@ async def make_onboarding_end(
     session: AsyncSession,
     default_username: str
 ):
+    """
+    Завершает процесс онбординга для пользователя, устанавливая значения
+    по умолчанию, если они не были предварительно установлены.
+    """
+
     user: User = await get_by_id(
         model=User,
         obj_id=user_id,
@@ -36,6 +41,7 @@ async def callback_message(
     **kwargs,
 ):
     """Редактировние сообщения."""
+
     target = target if isinstance(target, Message) else target.message
 
     if replace_message:

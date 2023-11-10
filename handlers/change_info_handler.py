@@ -16,6 +16,7 @@ router = Router(name='change_info_router')
 @router.callback_query(F.data == 'change_info')
 async def change_info(callback: CallbackQuery):
     """Выводит Категории и Статистику и осльной функционал."""
+
     await callback_message(
         target=callback,
         text='Изменить данные о себе',

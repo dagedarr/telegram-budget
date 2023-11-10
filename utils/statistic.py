@@ -25,10 +25,19 @@ async def set_statistic_msg(
     time_interval: TimeInterval,
     session: AsyncSession,
     mail_mode: bool
-):
+) -> str:
     """
     Создает текст сообщения пользователю с его тратами по
     Категориям и Алиасам за выбранный промежуток времени.
+
+    Parameters:
+    - user_id (int): Идентификатор пользователя.
+    - time_interval (TimeInterval): Выбранный временной интервал.
+    - session (AsyncSession): Асинхронная сессия для взаимодействия с БД.
+    - mail_mode (bool): Флаг режима форматирования сообщения для почты.
+
+    Returns:
+        str: Сформированное сообщение со статистикой расходов пользователя.
     """
 
     TAG = '<br>' if mail_mode else '\n'

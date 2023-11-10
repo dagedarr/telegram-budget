@@ -14,13 +14,13 @@ class MetaSingleton(type):
     _instances = {}
 
     def __call__(cls, *args, **kwargs):
-        """Стандарты синглтон паттер, только через message ID"""
+        """Стандартый синглтон паттер, только через message ID."""
 
-        if "paginator_id" not in kwargs:
+        if 'paginator_id' not in kwargs:
             raise ValueError(
-                "Не передан paginator_id в kwargs для инициализации Paginator"
+                'Не передан paginator_id в kwargs для инициализации Paginator'
             )
-        paginator_id: list = kwargs["paginator_id"]
+        paginator_id: list = kwargs['paginator_id']
 
         if len(cls._instances.keys()) > 1000:
             for key in cls._instances.keys()[:300]:
@@ -34,7 +34,7 @@ class MetaSingleton(type):
         return cls._instances[paginator_id]
 
 
-class PaginatorCallbackFactory(CallbackData, prefix="paginator"):
+class PaginatorCallbackFactory(CallbackData, prefix='paginator'):
     next: Optional[bool] = None
     paginator_id: int
 
@@ -54,7 +54,7 @@ class Paginator(metaclass=MetaSingleton):
         super().__init__()
         if data is None and not dynamic_buttons:
             raise ValueError(
-                "Не передан data/dynamic_buttons для инициализации Paginator"
+                'Не передан data/dynamic_buttons для инициализации Paginator'
             )
 
         self.buttons_adjust = buttons_adjust
@@ -75,21 +75,22 @@ class Paginator(metaclass=MetaSingleton):
             else False
         )
 
-        self.paginator_id = kwargs.get("paginator_id")
+        self.paginator_id = kwargs.get('paginator_id')
         self.buttons: list[InlineKeyboardButton] = []
 
-    def get_page(self, message_text: str = "", custom_text=None):
-        """Генерация текста сообщения"""
+    def get_page(self, message_text: str = '', custom_text=None):
+        """Генерация текста сообщения."""
+
         if custom_text:
-            page_text = f"{custom_text}\n"
+            page_text = f'{custom_text}\n'
         else:
-            page_text = ""
+            page_text = ''
         if self.data:
             for counter, item in enumerate(self.data[self.page]):
                 item_in_data_number = counter + (
                     self.items_on_page * self.page
                 )
-                page_text += f"{item_in_data_number + 1}. {item}\n"
+                page_text += f'{item_in_data_number + 1}. {item}\n'
 
         text = message_text if self.dynamic_buttons else page_text
         if not text:
@@ -98,7 +99,7 @@ class Paginator(metaclass=MetaSingleton):
 
     @property
     def keyboard(self) -> InlineKeyboardMarkup:
-        """Создание кнопок пагинатора"""
+        """Создание кнопок пагинатора."""
 
         builder = InlineKeyboardBuilder()
         self._add_basic_buttons(builder)
@@ -116,7 +117,7 @@ class Paginator(metaclass=MetaSingleton):
             InlineKeyboardMarkup,
         ],
     ) -> list[InlineKeyboardButton]:
-        """Добавления статичных кнопок"""
+        """Добавления статичных кнопок."""
 
         inline_keyboard = []
         if isinstance(buttons, InlineKeyboardBuilder):
@@ -134,7 +135,8 @@ class Paginator(metaclass=MetaSingleton):
     def _add_custom_buttons(
         self, builder: InlineKeyboardBuilder
     ) -> InlineKeyboardBuilder:
-        """НЕ ПЕРЕОПРЕДЕЛЯТЬ. Добавляет все кнопки, кроме базовых"""
+        """Добавляет все кнопки, кроме базовых."""
+
         basic_buttons: list[
             InlineKeyboardButton
         ] = builder.as_markup().inline_keyboard[0]
@@ -158,36 +160,38 @@ class Paginator(metaclass=MetaSingleton):
         return builder
 
     def _add_basic_buttons(self, builder: InlineKeyboardBuilder):
-        """Добавление базовых кнопок"""
+        """Добавление базовых кнопок."""
 
         builder.button(
-            text="Назад",
+            text='Назад',
             callback_data=PaginatorCallbackFactory(
                 next=False, paginator_id=self.paginator_id
             ),
         )
         builder.button(
-            text=f"{self.page + 1}/{len(self.data)}",
+            text=f'{self.page + 1}/{len(self.data)}',
             callback_data=PaginatorCallbackFactory(
                 paginator_id=self.paginator_id
             ),
         )
         builder.button(
-            text="Вперед",
+            text='Вперед',
             callback_data=PaginatorCallbackFactory(
                 next=True, paginator_id=self.paginator_id
             ),
         )
 
     def _create_chunks(self, array, buttons=False):
-        """Разбитие любого массива на требуемые чанки"""
+        """Разбитие любого массива на требуемые чанки."""
+
         return [
             array[i: i + self.items_on_page]
             for i in range(0, len(array), self.items_on_page)
         ]
 
     def _build_dynamic_buttons(self) -> list[InlineKeyboardButton]:
-        """Добавление динамический кнопок"""
+        """Добавление динамический кнопок."""
+
         builder = InlineKeyboardBuilder()
         all_buttons = []
         for name, callback in self.dynamic_buttons[self.page]:
@@ -225,7 +229,8 @@ class Paginator(metaclass=MetaSingleton):
 async def paginator_callback_handler(
     callback: types.CallbackQuery, callback_data: PaginatorCallbackFactory
 ):
-    """Обработка нажатий на базовые кнопки пагинатора"""
+    """Обработка нажатий на базовые кнопки пагинатора."""
+
     try:
         paginator = Paginator(paginator_id=callback_data.paginator_id)
     except ValueError:

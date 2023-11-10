@@ -1,4 +1,4 @@
-from typing import Optional, TypeVar
+from typing import List, Optional, Tuple, TypeVar, Union
 
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,7 +12,17 @@ async def get_by_id(
     obj_id: int,
     session: AsyncSession
 ) -> ModelType:
-    """Получение объекта по id."""
+    """
+    Получение объекта по ID.
+
+    Parameters:
+    - model (ModelType): Тип модели SQLAlchemy.
+    - obj_id (int): Идентификатор объекта.
+    - session (AsyncSession): Асинхронная сессия для взаимодействия с БД.
+
+    Returns:
+        ModelType: Объект модели, найденный по ID.
+    """
 
     get_obj_in_db = await session.execute(
         select(model).where(model.id == obj_id)
@@ -24,8 +34,19 @@ async def get_or_create(
     session: AsyncSession,
     model: ModelType,
     **kwargs
-):
-    """Получение или создание объекта."""
+) -> Tuple[ModelType, bool]:
+    """
+    Получение или создание объекта.
+
+    Parameters:
+    - session (AsyncSession): Асинхронная сессия для взаимодействия с БД.
+    - model (ModelType): Тип модели SQLAlchemy.
+    - **kwargs: Параметры для фильтрации или создания объекта.
+
+    Returns:
+        Tuple[ModelType, bool]: Кортеж, содержащий объект модели и флаг,
+                                указывающий на создание нового объекта.
+    """
 
     instance = await session.execute(select(model).filter_by(**kwargs))
     instance = instance.scalars().one_or_none()
@@ -43,7 +64,17 @@ async def update(
     obj_in: dict,
     session: AsyncSession,
 ) -> ModelType:
-    """Изменение значений полей объекта."""
+    """
+    Изменение значений полей объекта.
+
+    Parameters:
+    - db_obj (ModelType): Объект модели для обновления.
+    - obj_in (dict): Словарь с новыми значениями полей.
+    - session (AsyncSession): Асинхронная сессия для взаимодействия с БД.
+
+    Returns:
+        ModelType: Обновленный объект модели.
+    """
 
     for field in obj_in:
         setattr(db_obj, field, obj_in[field])
@@ -57,8 +88,18 @@ async def create(
     session: AsyncSession,
     model: ModelType,
     **kwargs
-):
-    """Создание объекта и возвращает его."""
+) -> ModelType:
+    """
+    Создание объекта и возвращает его.
+
+    Parameters:
+    - session (AsyncSession): Асинхронная сессия для взаимодействия с БД.
+    - model (ModelType): Тип модели SQLAlchemy.
+    - **kwargs: Параметры для создания объекта.
+
+    Returns:
+        ModelType: Новый объект модели.
+    """
 
     new_object = model(**kwargs)
     session.add(new_object)
@@ -74,8 +115,24 @@ async def get_by_attributes(
     get_multi: bool = False,
     amount: Optional[int] = None,
     order_by: Optional[str] = None
-):
-    """Получение объекта/объектов по нескольким атрибутам."""
+) -> Union[ModelType, List[ModelType]]:
+    """
+    Получение объекта/объектов по нескольким атрибутам.
+
+    Parameters:
+    - model (ModelType): Тип модели SQLAlchemy.
+    - attributes (dict): Словарь атрибутов и их значений для фильтрации.
+    - session (AsyncSession): Асинхронная сессия для взаимодействия с БД.
+    - get_multi (bool): Флаг для получения нескольких объектов
+                        (по умолчанию False).
+    - amount (Optional[int]): Количество объектов для получения (опционально).
+    - order_by (Optional[str]): Наименование поля для сортировки результатов
+                                (опционально).
+
+    Returns:
+        Union[ModelType, List[ModelType]]: Объект или список объектов модели,
+                                           удовлетворяющих условиям.
+    """
 
     query = select(model).where(
         *[
@@ -102,7 +159,16 @@ async def remove(
     db_obj: ModelType,
     session: AsyncSession,
 ) -> ModelType:
-    """Удаление объекта."""
+    """
+    Удаление объекта.
+
+    Parameters:
+    - db_obj (ModelType): Объект модели для удаления.
+    - session (AsyncSession): Асинхронная сессия для взаимодействия с БД.
+
+    Returns:
+        ModelType: Удаленный объект модели.
+    """
 
     await session.delete(db_obj)
     await session.commit()

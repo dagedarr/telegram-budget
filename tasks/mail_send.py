@@ -9,6 +9,8 @@ app = Celery('tasks', broker=Config.REDIS_URL)
 
 
 def get_email_template(user_email: str, subject: str, text: str):
+    """Формирует письмо пользователю."""
+
     email = EmailMessage()
     email['Subject'] = subject
     email['From'] = Config.SMTP_USER

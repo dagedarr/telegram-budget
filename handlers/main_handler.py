@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import Config
 from core.crud import get_by_attributes, remove
+from filters import IsEndOnboardingFilter
 from keyboards import (back_to_menu_keyboard, main_keyboard, other_keyboard,
                        universal_keyboard)
 from models import Transaction
@@ -13,7 +14,6 @@ from utils.transactions import (amount_validate, create_transaction,
                                 get_transactions_message,
                                 parse_text_for_amount_and_category)
 from utils.user_actions import callback_message
-from filters import IsEndOnboardingFilter
 
 router = Router(name='main_router')
 
@@ -86,7 +86,7 @@ async def del_last_transaction(callback: CallbackQuery, session: AsyncSession):
 
 @router.callback_query(F.data == 'other')
 async def other(callback: CallbackQuery):
-    """Выводит Категории и Статистику и остальной функционал."""
+    """Выводит Категории и Статистику, и остальной функционал."""
 
     await callback_message(
         target=callback,
@@ -101,6 +101,12 @@ async def get_transactions(message: Message, session: AsyncSession):
     """
     Обработчик Транзакций пользователя.
     Создает Транзакцию по введененным значениям суммы и категории (алиаса).
+
+    Пример корректных запросов:
+        Продукты 100
+        850 Снятие наличных
+        990,50 Развлечения
+        Транспорт 99.99
     """
 
     amount, title = await parse_text_for_amount_and_category(

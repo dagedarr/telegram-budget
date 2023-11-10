@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer
-
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, declared_attr
 
@@ -7,6 +6,8 @@ from config import Config
 
 
 class Base(DeclarativeBase):
+    """Базовый класс моделей."""
+
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()

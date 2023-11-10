@@ -104,7 +104,11 @@ def add_alias_keyboard(category_id: int) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def aliases_list_keyboard(callback, category_id, category_aliases):
+def aliases_list_keyboard(
+    callback, category_id, category_aliases
+) -> Paginator:
+    """Клавиатура пагинированного списка Алиасов."""
+
     buttons = [
         (
             alias.title,
