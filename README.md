@@ -42,7 +42,7 @@ docker-compose up -d
 
 ## Если Вы не используете Docker
 
-3.
+3. В директории telegram-budget выполните слудющие команды:
 
 ```
 python main.py
