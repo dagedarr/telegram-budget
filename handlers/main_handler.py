@@ -13,6 +13,7 @@ from utils.transactions import (amount_validate, create_transaction,
                                 get_transactions_message,
                                 parse_text_for_amount_and_category)
 from utils.user_actions import callback_message
+from filters import IsEndOnboardingFilter
 
 router = Router(name='main_router')
 
@@ -95,7 +96,7 @@ async def other(callback: CallbackQuery):
     )
 
 
-@router.message(F.text)
+@router.message(IsEndOnboardingFilter(), F.text)
 async def get_transactions(message: Message, session: AsyncSession):
     """
     Обработчик Транзакций пользователя.

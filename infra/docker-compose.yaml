@@ -3,26 +3,62 @@ version: '3.1'
 services:
   db:
     image: mysql:5.7
+    container_name: db
     restart: always
     command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
-    env_file:
-      - ../.env
     ports:
       - "3307:3306"
+    env_file:
+      - ../.env
     volumes:
-      - db_data:/var/lib/mysql
+      - mysql_db:/var/lib/mysql
 
   telegram-budget:
     build:
       context: ../
       dockerfile: Dockerfile
     restart: always
-    command: bash -c "alembic upgrade head && python main.py"
+    container_name: bot
+    command: ["infra/tg_bot.sh"]
     env_file:
       - ../.env
     depends_on:
       - db
 
+  redis:
+    image: redis:7
+    container_name: redis_app
+    command: --port 6379
+    expose:
+      - 6379
+    volumes:
+      - redis_db:/var/lib/redis
+
+  celery:
+    build:
+      context: ../
+    env_file:
+      - ../.env
+    container_name: celery_app
+    command: ["infra/celery.sh"]
+    depends_on:
+      - redis
+
+  flower:
+    build:
+      context: ../
+    env_file:
+      - ../.env
+    container_name: flower_app
+    command: ["infra/flower.sh"]
+    depends_on:
+      - redis
+      - celery
+    ports:
+      - "5556:5555"
+
 volumes:
-  db_data:
+  mysql_db:
+    driver: local
+  redis_db:
     driver: local
