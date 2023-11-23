@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from enum import StrEnum
+from enum import Enum, StrEnum
 
 from aiogram.filters.callback_data import CallbackData
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,6 +15,24 @@ class TimeInterval(StrEnum):
     TOTAL = 'total'
 
 
+class OutputMode(Enum):
+    TG_CHAT = {
+        'TAG': '\n',
+        'BOLD_TAG_START': '<b>',
+        'BOLD_TAG_END': '</b>'
+    }
+    MAIL = {
+        'TAG': '<br>',
+        'BOLD_TAG_START': '<b>',
+        'BOLD_TAG_END': '</b>'
+    }
+    GOOGLE_SHEETS = {
+        'TAG': '',
+        'BOLD_TAG_START': '',
+        'BOLD_TAG_END': ''
+    }
+
+
 class StatisticCallbackData(CallbackData, prefix='statistic'):
     action: str
     time_interval: str
@@ -24,7 +42,7 @@ async def set_statistic_msg(
     user_id: int,
     time_interval: TimeInterval,
     session: AsyncSession,
-    mail_mode: bool
+    output_mode: OutputMode
 ) -> str:
     """
     Создает текст сообщения пользователю с его тратами по
@@ -34,21 +52,26 @@ async def set_statistic_msg(
     - user_id (int): Идентификатор пользователя.
     - time_interval (TimeInterval): Выбранный временной интервал.
     - session (AsyncSession): Асинхронная сессия для взаимодействия с БД.
-    - mail_mode (bool): Флаг режима форматирования сообщения для почты.
+    - output_mode (OutputMode): Режим работы функции.
 
     Returns:
         str: Сформированное сообщение со статистикой расходов пользователя.
     """
 
-    TAG = '<br>' if mail_mode else '\n'
+    TAG = output_mode.value['TAG']
+    BOLD_TAG_START = output_mode.value['BOLD_TAG_START']
+    BOLD_TAG_END = output_mode.value['BOLD_TAG_END']
 
     user = await get_by_id(model=User, obj_id=user_id, session=session)
 
-    start_time, interval_label = get_interval_label(
+    start_time, label = get_interval_label(
         time_interval=time_interval
-        )
+    )
 
-    result = [f'<b>Сводка Расходов в период {interval_label}</b>{TAG}']
+    result = [
+        f'{BOLD_TAG_START}Сводка Расходов в период {label}{BOLD_TAG_END}{TAG}'
+    ]
+
     total_expense = 0
 
     for category in user.categories:
@@ -60,7 +83,9 @@ async def set_statistic_msg(
         total_expense += category_expense
 
         if category_expense > 0:
-            result.append(f'<b>{category.title}: {category_expense} ₽</b>')
+            text = (f'{BOLD_TAG_START}{category.title}: '
+                    f'{category_expense} ₽{BOLD_TAG_END}')
+            result.append(text)
 
         all_aliases_expense = 0
 
@@ -80,10 +105,13 @@ async def set_statistic_msg(
             )
 
     result.append(
-        f'{TAG}Общая сумма трат за выбранный период: <b>{total_expense}₽</b>'
+        f'{TAG}Общая сумма трат за выбранный период: '
+        f'{BOLD_TAG_START}{total_expense}₽{BOLD_TAG_END}'
     )
 
-    return f'{TAG}'.join(result)
+    if output_mode == OutputMode.GOOGLE_SHEETS:
+        return result
+    return TAG.join(result)
 
 
 def get_interval_label(time_interval: TimeInterval):

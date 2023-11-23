@@ -6,7 +6,7 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.crud import create, get_by_attributes, get_by_id
+from core.crud import create, get_by_attributes
 from models import Alias, Category, Transaction
 
 from .user_actions import callback_message
@@ -181,6 +181,5 @@ async def validate_transaction_for_del(
     if not transaction_id_from_msg:
         return 'Выберите транзакцию для удаления!\nНапример, /del_tr198'
 
-    print(transaction.user_id)
     if not transaction or user_id != transaction.user_id:
         return 'Это не Ваша транзакция!'
