@@ -11,9 +11,11 @@ from keyboards import (back_to_menu_keyboard, choose_interval_keyboard,
                        confirm_mail_keyboard, get_statistic_keyboard,
                        statistic_menu_keyboard)
 from models import User
+from tasks.google_api import (set_user_permissions, spreadsheets_create,
+                              spreadsheets_update_value)
 from tasks.mail_send import send_email_statistic
-from utils.statistic import (StatisticCallbackData, get_interval_label,
-                             set_statistic_msg)
+from utils.statistic import (OutputMode, StatisticCallbackData,
+                             get_interval_label, set_statistic_msg)
 from utils.user_actions import callback_message
 
 router = Router(name='statistic_router')
@@ -70,7 +72,7 @@ async def send_statistic_to_chat(
         user_id=callback.from_user.id,
         time_interval=time_interval,
         session=session,
-        mail_mode=False
+        output_mode=OutputMode.TG_CHAT
     )
 
     await callback_message(
@@ -124,7 +126,7 @@ async def send_statistic_to_email(
         user_id=callback.from_user.id,
         time_interval=time_interval,
         session=session,
-        mail_mode=True
+        output_mode=OutputMode.MAIL
     )
     label = get_interval_label(time_interval)[1]
     send_email_statistic.delay(
@@ -137,4 +139,53 @@ async def send_statistic_to_email(
         target=callback,
         text=f'Сообщение успешно отправлено на почту "{user.email}"!',
         reply_markup=back_to_menu_keyboard(),
+    )
+
+
+@router.callback_query(F.data == 'send_statistic_as_excel')
+async def send_statistic_as_excel(
+    callback: CallbackQuery,
+    state: FSMContext,
+    session: AsyncSession
+):
+    """Отправка ссылки гугл-таблицы со Статистикой."""
+
+    await callback_message(
+        target=callback,
+        text='Подождите, формируется таблица...',
+    )
+    data = await state.get_data()
+    time_interval = data['time_interval']
+    await state.clear()
+
+    spreadsheet_id = await spreadsheets_create(
+        label=get_interval_label(time_interval)[1]
+    )
+
+    print('1'*20)
+
+    await set_user_permissions(spreadsheet_id)
+
+    print('2'*20)
+
+    table_data = await set_statistic_msg(
+        user_id=callback.from_user.id,
+        time_interval=time_interval,
+        session=session,
+        output_mode=OutputMode.GOOGLE_SHEETS
+    )
+    print('3'*20)
+
+    await spreadsheets_update_value(
+        spreadsheet_id,
+        [[row] for row in table_data],
+    )
+    print('4'*20)
+
+    await callback_message(
+        target=callback,
+        text=('Ваша ссылка:\n'
+              f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}'),
+        reply_markup=back_to_menu_keyboard(),
+        delete_reply=False
     )

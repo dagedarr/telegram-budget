@@ -63,11 +63,15 @@ def choose_interval_keyboard() -> InlineKeyboardMarkup:
     )
     builder.row(
         InlineKeyboardButton(
-            text='Назад',
-            callback_data='statistic_menu'
+            text='Получить ссылку на таблицу',
+            callback_data='send_statistic_as_excel'
         )
     )
     builder.row(
+        InlineKeyboardButton(
+            text='Назад',
+            callback_data='statistic_menu'
+        ),
         InlineKeyboardButton(
             text='В меню',
             callback_data='other'

@@ -22,3 +22,21 @@ class Config:
 
     SMTP_USER: str = os.getenv('SMTP_USER')  # Логин
     SMTP_PASSWORD: str = os.getenv('SMTP_PASSWORD')  # Пароль
+
+    # ----------------------- GOOGLE API ------------------
+
+    FIRST_SUPERUSER_EMAIL: str = os.getenv('FIRST_SUPERUSER_EMAIL')
+    FIRST_SUPERUSER_PASSWORD: str = os.getenv('FIRST_SUPERUSER_PASSWORD')
+
+    TYPE: str = os.getenv('TYPE')
+    PROJECT_ID: str = os.getenv('PROJECT_ID')
+    PRIVATE_KEY_ID: str = os.getenv('PRIVATE_KEY_ID')
+    PRIVATE_KEY: str = os.getenv('PRIVATE_KEY')
+    CLIENT_EMAIL: str = os.getenv('CLIENT_EMAIL')
+    CLIENT_ID: str = os.getenv('CLIENT_ID')
+    AUTH_URI: str = os.getenv('AUTH_URI')
+    TOKEN_URI: str = os.getenv('TOKEN_URI')
+    AUTH_PROVIDER_X509_CERT_URL: str = os.getenv('AUTH_PROVIDER_X509_CERT_URL')
+    CLIENT_X509_CERT_URL: str = os.getenv('CLIENT_X509_CERT_URL')
+
+    EMAIL: str = os.getenv('EMAIL')
