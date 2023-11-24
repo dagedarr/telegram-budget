@@ -29,5 +29,5 @@ if __name__ == "__main__":
     asyncio.run(main())
 
 
-# celery -A tasks.mail_send:app worker --loglevel=INFO --pool=solo
-# celery -A tasks.mail_send:app flower
+# celery -A tasks.tasks:app worker --loglevel=INFO --pool=solo
+# celery -A tasks.tasks:app flower

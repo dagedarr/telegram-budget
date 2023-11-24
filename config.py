@@ -25,8 +25,8 @@ class Config:
 
     # ----------------------- GOOGLE API ------------------
 
-    FIRST_SUPERUSER_EMAIL: str = os.getenv('FIRST_SUPERUSER_EMAIL')
-    FIRST_SUPERUSER_PASSWORD: str = os.getenv('FIRST_SUPERUSER_PASSWORD')
+    # FIRST_SUPERUSER_EMAIL: str = os.getenv('FIRST_SUPERUSER_EMAIL')
+    # FIRST_SUPERUSER_PASSWORD: str = os.getenv('FIRST_SUPERUSER_PASSWORD')
 
     TYPE: str = os.getenv('TYPE')
     PROJECT_ID: str = os.getenv('PROJECT_ID')

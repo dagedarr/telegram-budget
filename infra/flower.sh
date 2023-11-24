@@ -1,3 +1,3 @@
 #!/bin/bash
 
-celery -A tasks.mail_send:app flower
+celery -A tasks.tasks:app flower

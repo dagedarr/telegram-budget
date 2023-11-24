@@ -1,3 +1,3 @@
 #!/bin/bash
 
-celery -A tasks.mail_send:app worker --loglevel=INFO
+celery -A tasks.tasks:app worker --loglevel=INFO
