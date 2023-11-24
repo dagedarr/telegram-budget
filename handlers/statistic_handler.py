@@ -11,9 +11,8 @@ from keyboards import (back_to_menu_keyboard, choose_interval_keyboard,
                        confirm_mail_keyboard, get_statistic_keyboard,
                        statistic_menu_keyboard)
 from models import User
-from tasks.google_api import (set_user_permissions, spreadsheets_create,
-                              spreadsheets_update_value)
-from tasks.mail_send import send_email_statistic
+from tasks.tasks import (send_email_statistic, set_user_permissions,
+                         spreadsheets_create, spreadsheets_update_value)
 from utils.statistic import (OutputMode, StatisticCallbackData,
                              get_interval_label, set_statistic_msg)
 from utils.user_actions import callback_message
