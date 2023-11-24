@@ -1,5 +1,8 @@
-from aiogoogle import Aiogoogle
-from aiogoogle.auth.creds import ServiceAccountCreds
+# from aiogoogle import Aiogoogle
+# from aiogoogle.auth.creds import ServiceAccountCreds
+
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
 
 from config import Config
 
@@ -21,9 +24,12 @@ INFO = {
     'client_x509_cert_url': Config.CLIENT_X509_CERT_URL
 }
 
-cred = ServiceAccountCreds(scopes=SCOPES, **INFO)
 
+def get_service(service: str, version: str):
+    credentials = service_account.Credentials.from_service_account_info(
+        INFO,
+        scopes=SCOPES
+    )
 
-async def get_service():
-    async with Aiogoogle(service_account_creds=cred) as aiogoogle:
-        yield aiogoogle
+    service = build(service, version, credentials=credentials)
+    yield service

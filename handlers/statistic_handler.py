@@ -157,15 +157,13 @@ async def send_statistic_as_excel(
     time_interval = data['time_interval']
     await state.clear()
 
-    spreadsheet_id = await spreadsheets_create(
+    # Создание гугл-таблицы
+    spreadsheet_id = str(spreadsheets_create.delay(
         label=get_interval_label(time_interval)[1]
-    )
+    ).get())
 
-    print('1'*20)
-
-    await set_user_permissions(spreadsheet_id)
-
-    print('2'*20)
+    # Выдача прав для исп-я гугл-таблицы
+    set_user_permissions.delay(spreadsheet_id)
 
     table_data = await set_statistic_msg(
         user_id=callback.from_user.id,
@@ -173,13 +171,12 @@ async def send_statistic_as_excel(
         session=session,
         output_mode=OutputMode.GOOGLE_SHEETS
     )
-    print('3'*20)
 
-    await spreadsheets_update_value(
+    # Внесение данных в гугл-таблицу
+    spreadsheets_update_value.delay(
         spreadsheet_id,
         [[row] for row in table_data],
     )
-    print('4'*20)
 
     await callback_message(
         target=callback,
